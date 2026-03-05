@@ -16,7 +16,7 @@ interface Props {
   } | null;
   teams?: (TeamMember & { team: Team })[];
   overallScore?: number | null;
-  activePage?: 'dashboard' | 'settings' | 'repo';
+  activePage?: 'dashboard' | 'settings' | 'repo' | 'metrics';
 }
 
 export default function PlatformShell({

@@ -14,7 +14,7 @@ interface Props {
   teams: (TeamMember & { team: Team })[];
   currentTeamId: string | 'personal';
   onSwitchTeam: (teamId: string | 'personal') => void;
-  activePage?: 'dashboard' | 'settings' | 'repo';
+  activePage?: 'dashboard' | 'settings' | 'repo' | 'metrics';
   showLogo?: boolean;
 }
 

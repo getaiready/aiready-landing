@@ -14,7 +14,6 @@ import {
 } from '@/components/Icons';
 import CodeBlock from '@/components/CodeBlock';
 import PlatformShell from '@/components/PlatformShell';
-import Breadcrumb from '@/components/Breadcrumb';
 import { Team, TeamMember } from '@/lib/db';
 import { LANDING_BASE_URL, PLATFORM_BASE_URL } from '@/lib/seo-schema';
 
@@ -427,7 +426,7 @@ export default function MetricsClient({
       user={user ? (user as any) : null}
       teams={teams}
       overallScore={overallScore}
-      activePage="dashboard"
+      activePage="metrics"
     >
       <Script
         id="tech-article-schema-metrics"
@@ -442,12 +441,6 @@ export default function MetricsClient({
         </div>
 
         <div className="relative z-10 max-w-5xl mx-auto">
-          <Breadcrumb
-            items={[
-              { label: 'Dashboard', href: '/dashboard' },
-              { label: 'Metrics Methodology', href: '/metrics' },
-            ]}
-          />
           <div className="text-center mb-16">
             <motion.div
               initial={{ opacity: 0, y: 20 }}

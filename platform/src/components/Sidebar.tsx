@@ -48,7 +48,7 @@ export default function Sidebar({ overallScore }: Props) {
     { href: '/dashboard', label: 'Dashboard', icon: RocketIcon },
     { href: '/trends', label: 'Trends Explorer', icon: TrendingUpIcon },
     { href: '/map', label: 'Codebase Map', icon: RobotIcon },
-    { href: '/metrics', label: 'Benchmarks', icon: ChartIcon },
+    { href: '/metrics', label: 'Methodology', icon: ChartIcon },
   ];
 
   return (

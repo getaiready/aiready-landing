@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { signIn } from 'next-auth/react';
 import { motion, AnimatePresence } from 'framer-motion';
-import Navbar from '@/components/Navbar';
+import PlatformShell from '@/components/PlatformShell';
 import {
   RocketIcon,
   PlayIcon,
@@ -15,6 +15,7 @@ import {
   TrendingUpIcon,
   TrashIcon,
   ChartIcon,
+  RobotIcon,
 } from '@/components/Icons';
 import { useEffect } from 'react';
 import { toast } from 'sonner';
@@ -340,50 +341,13 @@ export default function DashboardClient({
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] relative overflow-hidden">
-      {/* Background effects */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div
-          className="orb orb-blue w-96 h-96 -top-48 -right-48"
-          style={{ animationDelay: '0s' }}
-        />
-        <div
-          className="orb orb-purple w-80 h-80 bottom-0 -left-40"
-          style={{ animationDelay: '3s' }}
-        />
-      </div>
-      <div className="absolute inset-0 bg-grid-pattern opacity-30" />
-
-      {/* Header */}
-      <Navbar user={user} activePage="dashboard" />
-
-      <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-        {/* Team Switcher */}
-        <div className="flex items-center gap-2 p-1 bg-slate-900/50 rounded-xl border border-slate-700/50 w-fit">
-          <button
-            onClick={() => setCurrentTeamId('personal')}
-            className={`px-4 py-1.5 text-xs font-semibold rounded-lg transition-all ${
-              currentTeamId === 'personal'
-                ? 'bg-cyan-500 text-white shadow-lg shadow-cyan-500/20'
-                : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            Personal
-          </button>
-          {teams.map((t) => (
-            <button
-              key={t.teamId}
-              onClick={() => setCurrentTeamId(t.teamId)}
-              className={`px-4 py-1.5 text-xs font-semibold rounded-lg transition-all ${
-                currentTeamId === t.teamId
-                  ? 'bg-purple-600 text-white shadow-lg shadow-purple-600/20'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              {t.team.name}
-            </button>
-          ))}
-        </div>
+    <PlatformShell
+      user={user}
+      teams={teams}
+      overallScore={overallScore}
+      activePage="dashboard"
+    >
+      <div className="p-4 sm:p-6 lg:p-8 space-y-8">
         {/* Welcome + overall score */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -730,7 +694,7 @@ export default function DashboardClient({
             }
           />
         )}
-      </main>
+      </div>
 
       {/* Add Repository Modal */}
       <AnimatePresence>
@@ -745,160 +709,118 @@ export default function DashboardClient({
             }}
           >
             <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="glass-card rounded-2xl shadow-2xl w-full max-w-md"
+              initial={{ scale: 0.95, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 20 }}
+              className="bg-slate-900 border border-slate-800 rounded-3xl p-8 max-w-lg w-full shadow-2xl relative overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
             >
-              <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-slate-700/50">
-                <h3 className="text-lg font-semibold text-white">
+              {/* Background Glow */}
+              <div className="absolute -top-24 -right-24 w-48 h-48 bg-cyan-500/10 blur-[80px] -z-10" />
+
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-white">
                   Add Repository
-                </h3>
+                </h2>
                 <button
                   onClick={() => setShowAddRepo(false)}
-                  className="text-slate-400 hover:text-white text-xl leading-none"
+                  className="text-slate-500 hover:text-white transition-colors"
                 >
-                  ×
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
                 </button>
               </div>
-              <form onSubmit={handleAddRepo} className="px-6 py-5 space-y-4">
-                {addRepoError && (
-                  <div className="text-sm text-red-400 bg-red-900/30 border border-red-500/30 rounded-lg px-3 py-2">
-                    {addRepoError}
-                  </div>
-                )}
+
+              <form onSubmit={handleAddRepo} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-1">
+                  <label className="block text-sm font-medium text-slate-400 mb-1.5">
                     Repository Name
                   </label>
                   <input
                     type="text"
                     required
-                    placeholder="my-awesome-project"
+                    placeholder="e.g. ai-ready-core"
                     value={addRepoForm.name}
                     onChange={(e) =>
-                      setAddRepoForm((f) => ({ ...f, name: e.target.value }))
+                      setAddRepoForm({ ...addRepoForm, name: e.target.value })
                     }
-                    className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50"
+                    className="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 transition-all"
                   />
                 </div>
+
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-1">
-                    Repository URL
+                  <label className="block text-sm font-medium text-slate-400 mb-1.5">
+                    GitHub URL
                   </label>
                   <input
-                    type="text"
+                    type="url"
                     required
                     placeholder="https://github.com/user/repo"
                     value={addRepoForm.url}
                     onChange={(e) =>
-                      setAddRepoForm((f) => ({ ...f, url: e.target.value }))
+                      setAddRepoForm({ ...addRepoForm, url: e.target.value })
                     }
-                    className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50"
+                    className="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 transition-all"
                   />
                 </div>
-                {addRepoForm.url.includes('github.com') && !user.githubId && (
-                  <div className="p-4 bg-indigo-500/10 border border-indigo-500/30 rounded-xl space-y-3 mt-2">
-                    <div className="flex items-start gap-3">
-                      <div className="p-1.5 bg-indigo-500/20 rounded-lg">
-                        <svg
-                          className="w-4 h-4 text-indigo-400"
-                          fill="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
-                        </svg>
-                      </div>
-                      <div className="space-y-1">
-                        <p className="text-xs font-bold text-white">
-                          GitHub Connection Required
-                        </p>
-                        <p className="text-[10px] text-slate-400 leading-relaxed">
-                          To scan private repositories or use automated
-                          features, you need to connect your GitHub account.
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex gap-2">
-                      <button
-                        type="button"
-                        onClick={() => signIn('github')}
-                        className="flex-1 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-black uppercase tracking-wider rounded-lg transition-colors shadow-lg shadow-indigo-500/20"
-                      >
-                        Connect Now
-                      </button>
-                      <a
-                        href="https://github.com/apps/aiready/installations/new"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex-1 py-1.5 bg-white/5 hover:bg-white/10 text-white text-[10px] font-black uppercase tracking-wider rounded-lg transition-colors border border-white/10 text-center"
-                      >
-                        Install App
-                      </a>
-                    </div>
-                  </div>
-                )}
+
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-1">
-                    Description{' '}
-                    <span className="text-slate-500 font-normal">
-                      (optional)
-                    </span>
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="What does this repo do?"
-                    value={addRepoForm.description}
-                    onChange={(e) =>
-                      setAddRepoForm((f) => ({
-                        ...f,
-                        description: e.target.value,
-                      }))
-                    }
-                    className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-1">
+                  <label className="block text-sm font-medium text-slate-400 mb-1.5">
                     Default Branch
                   </label>
                   <input
                     type="text"
-                    placeholder="main"
+                    required
                     value={addRepoForm.defaultBranch}
                     onChange={(e) =>
-                      setAddRepoForm((f) => ({
-                        ...f,
+                      setAddRepoForm({
+                        ...addRepoForm,
                         defaultBranch: e.target.value,
-                      }))
+                      })
                     }
-                    className="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50"
+                    className="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 transition-all"
                   />
                 </div>
-                <div className="flex gap-3 pt-2">
+
+                {addRepoError && (
+                  <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+                    {addRepoError}
+                  </div>
+                )}
+
+                <div className="pt-2">
                   <button
-                    type="button"
-                    onClick={() => setShowAddRepo(false)}
-                    className="flex-1 px-4 py-2.5 border border-slate-600 text-slate-300 text-sm font-medium rounded-lg hover:bg-slate-800 transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
                     type="submit"
                     disabled={addRepoLoading}
-                    className="flex-1 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white text-sm font-medium rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full btn-primary py-4 rounded-xl font-bold flex items-center justify-center gap-2 group"
                   >
-                    {addRepoLoading ? 'Adding...' : 'Add Repository'}
-                  </motion.button>
+                    {addRepoLoading ? (
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    ) : (
+                      <>
+                        <span>Add Repository</span>
+                        <RocketIcon className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                      </>
+                    )}
+                  </button>
                 </div>
               </form>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </PlatformShell>
   );
 }
 
@@ -1031,26 +953,24 @@ function RepoCard({
 
           {analysis && (
             <>
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={onViewTrends}
-                className="flex items-center justify-center gap-2 px-3 py-2 bg-indigo-500/10 text-indigo-400 text-xs font-bold rounded-lg hover:bg-indigo-500/20 transition-all border border-indigo-500/30"
-              >
-                <TrendingUpIcon className="w-3.5 h-3.5" />
-                Trends
-              </motion.button>
-              <Link
-                href={`/dashboard/repo/${repo.id}/visualize`}
-                className="block"
-              >
+              <Link href={`/trends?repoId=${repo.id}`} className="flex-1">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-indigo-500/10 text-indigo-400 text-xs font-bold rounded-lg hover:bg-indigo-500/20 transition-all border border-indigo-500/30"
+                >
+                  <TrendingUpIcon className="w-3.5 h-3.5" />
+                  Trends
+                </motion.button>
+              </Link>
+              <Link href={`/map?repoId=${repo.id}`} className="flex-1">
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   className="w-full h-full flex items-center justify-center gap-2 px-3 py-2 bg-cyan-500/10 text-cyan-400 text-xs font-bold rounded-lg hover:bg-cyan-500/20 transition-all border border-cyan-500/30"
                 >
-                  <RocketIcon className="w-3.5 h-3.5" />
-                  Map
+                  <RobotIcon className="w-3.5 h-3.5" />
+                  Codebase Map
                 </motion.button>
               </Link>
             </>

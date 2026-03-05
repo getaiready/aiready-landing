@@ -1,6 +1,11 @@
 import { auth } from '@/app/api/auth/[...nextauth]/route';
 import { redirect } from 'next/navigation';
-import { getUserByEmail, createUser } from '@/lib/db';
+import {
+  getUserByEmail,
+  createUser,
+  listUserTeams,
+  listUserRepositories,
+} from '@/lib/db';
 import SettingsClient from './SettingsClient';
 
 export default async function SettingsPage() {
@@ -33,6 +38,21 @@ export default async function SettingsPage() {
     };
   }
 
+  const teams = await listUserTeams(session.user.id);
+  const userRepos = await listUserRepositories(session.user.id);
+
+  // Calculate overall AI score
+  const reposWithScores = userRepos.filter(
+    (r) => r.aiScore !== null && r.aiScore !== undefined
+  );
+  const overallScore =
+    reposWithScores.length > 0
+      ? Math.round(
+          reposWithScores.reduce((sum, r) => sum + (r.aiScore || 0), 0) /
+            reposWithScores.length
+        )
+      : null;
+
   return (
     <SettingsClient
       user={{
@@ -43,6 +63,8 @@ export default async function SettingsPage() {
         githubId: user.githubId,
         googleId: user.googleId,
       }}
+      teams={teams}
+      overallScore={overallScore}
     />
   );
 }

@@ -1,12 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
-import Navbar from '@/components/Navbar';
-import type { ApiKey } from '@/lib/db';
+import PlatformShell from '@/components/PlatformShell';
+import type { ApiKey, Team, TeamMember } from '@/lib/db';
 
 interface Props {
   user: {
@@ -17,9 +17,12 @@ interface Props {
     githubId?: string | null;
     googleId?: string | null;
   };
+  teams: (TeamMember & { team: Team })[];
+  overallScore: number | null;
 }
 
-export default function SettingsClient({ user }: Props) {
+export default function SettingsClient({ user, teams, overallScore }: Props) {
+  const router = useRouter();
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
   const [newKeyName, setNewKeyName] = useState('');
   const [newlyCreatedKey, setNewlyCreatedKey] = useState<string | null>(null);
@@ -79,18 +82,13 @@ export default function SettingsClient({ user }: Props) {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] relative overflow-hidden">
-      {/* Background effects */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="orb orb-blue w-96 h-96 -top-48 -right-48 opacity-30" />
-        <div className="orb orb-purple w-80 h-80 bottom-0 -left-40 opacity-30" />
-      </div>
-      <div className="absolute inset-0 bg-grid-pattern opacity-30" />
-
-      {/* Header */}
-      <Navbar user={user} activePage="settings" />
-
-      <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <PlatformShell
+      user={user}
+      teams={teams}
+      overallScore={overallScore}
+      activePage="settings"
+    >
+      <div className="p-4 sm:p-6 lg:p-8 space-y-8">
         {/* Profile Section */}
         <section className="space-y-6">
           <div className="flex items-center gap-4">
@@ -215,43 +213,27 @@ export default function SettingsClient({ user }: Props) {
                   </div>
                 </div>
                 {user.githubId ? (
-                  <span className="px-3 py-1 bg-green-500/10 text-green-400 text-[10px] font-bold rounded-lg border border-green-500/20 uppercase">
+                  <div className="flex items-center gap-2 text-emerald-400 text-xs font-bold uppercase tracking-wider bg-emerald-400/10 px-3 py-1 rounded-full border border-emerald-400/20">
+                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                     Connected
-                  </span>
+                  </div>
                 ) : (
                   <button
                     onClick={() => signIn('github')}
-                    className="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg transition-colors"
+                    className="text-xs font-bold text-indigo-400 hover:text-white transition-colors"
                   >
                     Connect
                   </button>
                 )}
               </div>
-              <div className="pt-2">
-                <p className="text-xs text-slate-400 leading-relaxed mb-4">
-                  Connecting your GitHub account allows you to scan private
-                  repositories you have access to.
-                </p>
+              <div className="flex gap-2">
                 <a
                   href="https://github.com/apps/aiready/installations/new"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 text-xs text-cyan-400 hover:text-cyan-300 font-bold transition-colors"
+                  className="flex-1 text-center py-2 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded-xl border border-slate-700 transition-all"
                 >
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                    />
-                  </svg>
-                  Configure GitHub App Installation
+                  Configure App
                 </a>
               </div>
             </div>
@@ -263,54 +245,47 @@ export default function SettingsClient({ user }: Props) {
                   <div className="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center">
                     <svg className="w-5 h-5" viewBox="0 0 24 24">
                       <path
-                        fill="#4285F4"
-                        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                        fill="currentColor"
+                        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c1.82-3.33 2.87-8.24 2.87-12.25z"
                       />
                       <path
-                        fill="#34A853"
+                        fill="currentColor"
                         d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
                       />
                       <path
-                        fill="#FBBC05"
+                        fill="currentColor"
                         d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"
                       />
                       <path
-                        fill="#EA4335"
-                        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                        fill="currentColor"
+                        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 12-4.53z"
                       />
                     </svg>
                   </div>
                   <div>
                     <h3 className="text-white font-bold">Google</h3>
-                    <p className="text-xs text-slate-400">
-                      Primary login method
-                    </p>
+                    <p className="text-xs text-slate-400">Account login</p>
                   </div>
                 </div>
                 {user.googleId ? (
-                  <span className="px-3 py-1 bg-green-500/10 text-green-400 text-[10px] font-bold rounded-lg border border-green-500/20 uppercase">
+                  <div className="flex items-center gap-2 text-emerald-400 text-xs font-bold uppercase tracking-wider bg-emerald-400/10 px-3 py-1 rounded-full border border-emerald-400/20">
+                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                     Connected
-                  </span>
+                  </div>
                 ) : (
                   <button
                     onClick={() => signIn('google')}
-                    className="px-4 py-1.5 bg-white/5 hover:bg-white/10 text-white text-xs font-bold rounded-lg transition-colors border border-white/10"
+                    className="text-xs font-bold text-indigo-400 hover:text-white transition-colors"
                   >
                     Connect
                   </button>
                 )}
               </div>
-              <div className="pt-2">
-                <p className="text-xs text-slate-400 leading-relaxed">
-                  Your Google account is used for secure authentication and
-                  profile management.
-                </p>
-              </div>
             </div>
           </div>
         </section>
 
-        {/* API Keys Section */}
+        {/* API Access Section */}
         <section className="space-y-6">
           <div className="flex items-center gap-4">
             <div className="p-3 bg-cyan-500/10 rounded-2xl border border-cyan-500/20">
@@ -329,53 +304,52 @@ export default function SettingsClient({ user }: Props) {
               </svg>
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-white">API Keys</h2>
+              <h2 className="text-2xl font-bold text-white">API Access</h2>
               <p className="text-slate-400 text-sm">
-                Create and manage keys for the AIReady CLI.
+                Generate keys to use AIReady from your CI/CD pipelines.
               </p>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-6">
-            <div className="glass-card rounded-3xl p-8 border border-white/5 h-fit">
-              <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
+          <div className="glass-card rounded-3xl overflow-hidden border border-white/5">
+            <div className="p-8 border-b border-white/5 bg-white/[0.02]">
+              <h3 className="text-lg font-bold text-white mb-4">
                 Generate New Key
               </h3>
               <form onSubmit={handleCreateKey} className="flex gap-4">
                 <input
                   type="text"
-                  placeholder="What is this key for? (e.g. CI/CD)"
+                  placeholder="Key Name (e.g. Production CI)"
                   value={newKeyName}
                   onChange={(e) => setNewKeyName(e.target.value)}
-                  className="flex-1 bg-slate-900/50 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-cyan-500/30 transition-all"
-                  required
+                  className="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
                 />
                 <button
                   type="submit"
                   disabled={keysLoading}
-                  className="px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white text-sm font-bold rounded-xl shadow-lg hover:shadow-cyan-500/25 transition-all disabled:opacity-50"
+                  className="px-8 py-3 bg-cyan-500 hover:bg-cyan-400 text-[#0a0a0f] font-black rounded-xl transition-all shadow-lg shadow-cyan-500/20 disabled:opacity-50"
                 >
-                  {keysLoading ? 'Generating...' : 'Create Key'}
+                  {keysLoading ? 'Generating...' : 'Generate Key'}
                 </button>
               </form>
             </div>
 
-            <div className="glass-card rounded-3xl overflow-hidden border border-white/5 bg-slate-900/20">
+            <div className="p-0">
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm">
+                <table className="w-full text-left">
                   <thead>
-                    <tr className="bg-slate-800/40 text-slate-400 border-b border-white/5">
-                      <th className="px-8 py-5 font-semibold uppercase tracking-wider text-[11px]">
+                    <tr className="bg-white/[0.01]">
+                      <th className="px-8 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">
                         Name
                       </th>
-                      <th className="px-8 py-5 font-semibold uppercase tracking-wider text-[11px]">
-                        Key Prefix
+                      <th className="px-8 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">
+                        Key Preview
                       </th>
-                      <th className="px-8 py-5 font-semibold uppercase tracking-wider text-[11px]">
+                      <th className="px-8 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">
                         Created
                       </th>
-                      <th className="px-8 py-5 font-semibold uppercase tracking-wider text-[11px] text-right">
-                        Action
+                      <th className="px-8 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest text-right">
+                        Actions
                       </th>
                     </tr>
                   </thead>
@@ -386,32 +360,26 @@ export default function SettingsClient({ user }: Props) {
                           colSpan={4}
                           className="px-8 py-12 text-center text-slate-500 italic"
                         >
-                          No active API keys found.
+                          No API keys generated yet.
                         </td>
                       </tr>
                     ) : (
                       apiKeys.map((key) => (
-                        <tr
-                          key={key.id}
-                          className="hover:bg-white/[0.02] transition-colors"
-                        >
-                          <td className="px-8 py-5 text-white font-semibold">
-                            {key.name}
+                        <tr key={key.id} className="hover:bg-white/[0.01]">
+                          <td className="px-8 py-4">
+                            <span className="text-white font-medium">
+                              {key.name}
+                            </span>
                           </td>
-                          <td className="px-8 py-5 font-mono text-cyan-400">
-                            {key.prefix}••••••••
+                          <td className="px-8 py-4">
+                            <code className="text-cyan-400/70 font-mono text-xs">
+                              {key.prefix}••••••••
+                            </code>
                           </td>
-                          <td className="px-8 py-5 text-slate-400">
-                            {new Date(key.createdAt).toLocaleDateString(
-                              undefined,
-                              {
-                                year: 'numeric',
-                                month: 'short',
-                                day: 'numeric',
-                              }
-                            )}
+                          <td className="px-8 py-4 text-slate-400 text-sm">
+                            {new Date(key.createdAt).toLocaleDateString()}
                           </td>
-                          <td className="px-8 py-5 text-right">
+                          <td className="px-8 py-4 text-right">
                             <button
                               onClick={() => handleDeleteKey(key.id)}
                               className="px-3 py-1.5 text-xs text-slate-400 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-all"
@@ -428,7 +396,7 @@ export default function SettingsClient({ user }: Props) {
             </div>
           </div>
         </section>
-      </main>
+      </div>
 
       {/* New Key Modal */}
       <AnimatePresence>
@@ -510,6 +478,6 @@ export default function SettingsClient({ user }: Props) {
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </PlatformShell>
   );
 }

@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
-import Navbar from '@/components/Navbar';
+import { useRouter } from 'next/navigation';
+import PlatformShell from '@/components/PlatformShell';
 import {
   AlertCircleIcon,
   InfoIcon,
@@ -13,6 +14,7 @@ import {
   TrendingUpIcon,
   ShieldIcon,
   FileIcon,
+  RobotIcon,
 } from '@/components/Icons';
 import {
   scoreColor,
@@ -20,7 +22,7 @@ import {
   scoreGlow,
   scoreLabel,
 } from '@aiready/components';
-import type { Repository, Analysis } from '@/lib/db';
+import type { Repository, Analysis, Team, TeamMember } from '@/lib/db';
 import type { AnalysisData } from '@/lib/storage';
 
 interface Props {
@@ -31,9 +33,20 @@ interface Props {
     email?: string | null;
     image?: string | null;
   };
+  teams: (TeamMember & { team: Team })[];
+  overallScore: number | null;
 }
 
-export default function RepoDetailClient({ repo, user }: Props) {
+export default function RepoDetailClient({
+  repo,
+  user,
+  teams,
+  overallScore,
+}: Props) {
+  const router = useRouter();
+  const [currentTeamId, setCurrentTeamId] = useState<string | 'personal'>(
+    'personal'
+  );
   const [analysis, setAnalysis] = useState<AnalysisData | null>(null);
   const [selectedTool, setSelectedTool] = useState<string | null>(null);
   const [expandedIssues, setExpandedIssues] = useState<Set<number>>(new Set());
@@ -241,18 +254,13 @@ export default function RepoDetailClient({ repo, user }: Props) {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] relative overflow-hidden text-white">
-      {/* Background effects */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="orb orb-blue w-96 h-96 -top-48 -right-48 opacity-20" />
-        <div className="orb orb-purple w-80 h-80 bottom-0 -left-40 opacity-20" />
-      </div>
-      <div className="absolute inset-0 bg-grid-pattern opacity-20" />
-
-      {/* Header */}
-      <Navbar user={user} activePage="repo" />
-
-      <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <PlatformShell
+      user={user}
+      teams={teams}
+      overallScore={overallScore}
+      activePage="repo"
+    >
+      <div className="p-4 sm:p-6 lg:p-8 space-y-8 text-white">
         {/* Repo Title & Score */}
         <section className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div className="space-y-4">
@@ -277,11 +285,11 @@ export default function RepoDetailClient({ repo, user }: Props) {
                 Back to Dashboard
               </Link>
               <Link
-                href={`/dashboard/repo/${repo.id}/visualize`}
-                className="text-purple-400 text-xs font-black uppercase tracking-widest hover:text-purple-300 transition-colors flex items-center gap-2"
+                href={`/map?repoId=${repo.id}`}
+                className="text-cyan-400 text-xs font-black uppercase tracking-widest hover:text-cyan-300 transition-colors flex items-center gap-2"
               >
-                <TrendingUpIcon className="w-3.5 h-3.5" />
-                View Relationship Map
+                <RobotIcon className="w-3.5 h-3.5" />
+                View Codebase Map
               </Link>
             </div>
             <div className="space-y-1">
@@ -710,7 +718,7 @@ export default function RepoDetailClient({ repo, user }: Props) {
             </div>
           )
         )}
-      </main>
-    </div>
+      </div>
+    </PlatformShell>
   );
 }

@@ -20,13 +20,13 @@ export async function GET(request: NextRequest) {
     const teamId = searchParams.get('teamId');
 
     if (!teamId) {
-      return NextResponse.json(
-        { error: 'Team ID is required' },
-        { status: 400 }
-      );
+      // List user's teams
+      const { listUserTeams } = await import('@/lib/db');
+      const teams = await listUserTeams(session.user.id);
+      return NextResponse.json({ teams });
     }
 
-    // TODO: Verify session user is a member of the team
+    // List team members
     const members = await listTeamMembers(teamId);
     return NextResponse.json({ members });
   } catch (error) {

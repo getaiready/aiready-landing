@@ -2,7 +2,7 @@
 
 import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
-import Navbar from '@/components/Navbar';
+import PlatformShell from '@/components/PlatformShell';
 import Visualizer from '@/components/Visualizer';
 import { GraphBuilder, GraphData } from '@/lib/graph-builder';
 import { toast } from 'sonner';
@@ -18,6 +18,7 @@ export default function VisualizePage({ params: paramsPromise }: Props) {
   const [repo, setRepo] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
+  const [teams, setTeams] = useState<any[]>([]);
 
   useEffect(() => {
     fetchData();
@@ -43,13 +44,17 @@ export default function VisualizePage({ params: paramsPromise }: Props) {
       const graphData = GraphBuilder.buildFromReport(result.analysis);
       setData(graphData);
 
-      // We need user info for Navbar - fetch from a session-like source or just use a placeholder
-      // For now, let's fetch repo to get owner info or similar
-      // Actually, RepoDetailClient gets user as prop, we should probably do same or use a hook
       const sessionRes = await fetch('/api/auth/session');
       const session = await sessionRes.json();
       if (session?.user) {
         setUser(session.user);
+
+        // Fetch teams
+        const teamsRes = await fetch('/api/teams');
+        const teamsData = await teamsRes.json();
+        if (teamsRes.ok) {
+          setTeams(teamsData.teams || []);
+        }
       }
     } catch (err) {
       console.error('Error fetching visualization data:', err);
@@ -60,11 +65,9 @@ export default function VisualizePage({ params: paramsPromise }: Props) {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] flex flex-col overflow-hidden">
-      {user && <Navbar user={user} activePage="repo" />}
-
-      <main className="flex-1 relative flex flex-col p-4 md:p-8 overflow-hidden">
-        {/* Header section inside main */}
+    <PlatformShell user={user} teams={teams} activePage="repo">
+      <div className="flex flex-col h-full p-4 md:p-8 overflow-hidden text-white">
+        {/* Header section */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 z-10">
           <div className="space-y-1">
             <div className="flex items-center gap-3">
@@ -140,7 +143,7 @@ export default function VisualizePage({ params: paramsPromise }: Props) {
             </div>
           )}
         </div>
-      </main>
-    </div>
+      </div>
+    </PlatformShell>
   );
 }

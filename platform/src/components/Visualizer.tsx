@@ -3,13 +3,20 @@
 import { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FileNode, GraphEdge, GraphData } from '@/lib/graph-builder';
+import {
+  FileNode,
+  GraphEdge,
+  GraphData,
+  IssueSeverity,
+} from '@/lib/graph-builder';
 
 interface Props {
   data: GraphData;
+  filters?: Record<IssueSeverity | 'healthy', boolean>;
+  onToggleFilter?: (sev: IssueSeverity | 'healthy') => void;
 }
 
-export default function Visualizer({ data }: Props) {
+export default function Visualizer({ data, filters, onToggleFilter }: Props) {
   const [selectedNode, setSelectedNode] = useState<FileNode | null>(null);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
@@ -53,17 +60,68 @@ export default function Visualizer({ data }: Props) {
       )}
 
       {/* Legend */}
-      <div className="absolute top-6 left-6 z-20">
+      <div className="absolute top-6 left-6 z-20 space-y-4">
         <div className="glass-card p-4 rounded-2xl border border-white/10 space-y-3 shadow-xl backdrop-blur-md">
           <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
-            Severity Legend
+            Entity Health
           </h4>
           <div className="space-y-2">
-            <LegendItem color="#ff4d4f" label="Critical" />
-            <LegendItem color="#ff9900" label="Major" />
-            <LegendItem color="#ffd666" label="Minor" />
-            <LegendItem color="#91d5ff" label="Info" />
-            <LegendItem color="#97c2fc" label="Healthy" />
+            <LegendItem
+              color="#ff4d4f"
+              label="Critical"
+              active={filters?.critical}
+              onClick={() => onToggleFilter?.('critical')}
+            />
+            <LegendItem
+              color="#ff9900"
+              label="Major"
+              active={filters?.major}
+              onClick={() => onToggleFilter?.('major')}
+            />
+            <LegendItem
+              color="#ffd666"
+              label="Minor"
+              active={filters?.minor}
+              onClick={() => onToggleFilter?.('minor')}
+            />
+            <LegendItem
+              color="#91d5ff"
+              label="Info"
+              active={filters?.info}
+              onClick={() => onToggleFilter?.('info')}
+            />
+            <LegendItem
+              color="#97c2fc"
+              label="Healthy"
+              active={filters?.healthy}
+              onClick={() => onToggleFilter?.('healthy')}
+            />
+          </div>
+        </div>
+
+        <div className="glass-card p-4 rounded-2xl border border-white/10 space-y-3 shadow-xl backdrop-blur-md">
+          <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
+            Connection Types
+          </h4>
+          <div className="space-y-2">
+            <div className="flex items-center gap-3">
+              <div className="w-6 h-0.5 bg-cyan-400 opacity-50" />
+              <span className="text-[11px] font-bold text-slate-400">
+                Dependency
+              </span>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-6 h-0.5 bg-amber-400 opacity-50" />
+              <span className="text-[11px] font-bold text-slate-400">
+                Similarity
+              </span>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-6 h-0.5 border-t border-dashed border-blue-400 opacity-50" />
+              <span className="text-[11px] font-bold text-slate-400">
+                Reference
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -131,8 +189,12 @@ export default function Visualizer({ data }: Props) {
 
                 <div className="grid grid-cols-2 gap-4">
                   <StatItem
-                    label="Token Cost"
-                    value={selectedNode.tokenCost || 'N/A'}
+                    label="Context Budget"
+                    value={
+                      selectedNode.tokenCost != null
+                        ? `${selectedNode.tokenCost.toLocaleString()} tokens`
+                        : 'N/A'
+                    }
                   />
                   <StatItem
                     label="Duplicates"
@@ -166,9 +228,22 @@ export default function Visualizer({ data }: Props) {
   );
 }
 
-function LegendItem({ color, label }: { color: string; label: string }) {
+function LegendItem({
+  color,
+  label,
+  active = true,
+  onClick,
+}: {
+  color: string;
+  label: string;
+  active?: boolean;
+  onClick?: () => void;
+}) {
   return (
-    <div className="flex items-center gap-3 group">
+    <button
+      onClick={onClick}
+      className={`flex items-center gap-3 group w-full transition-opacity ${active ? 'opacity-100' : 'opacity-30'}`}
+    >
       <div
         className="w-2.5 h-2.5 rounded-full shadow-lg transition-transform group-hover:scale-125"
         style={{ backgroundColor: color, boxShadow: `0 0 8px ${color}44` }}
@@ -176,7 +251,7 @@ function LegendItem({ color, label }: { color: string; label: string }) {
       <span className="text-[11px] font-bold text-slate-400 group-hover:text-slate-200 transition-colors">
         {label}
       </span>
-    </div>
+    </button>
   );
 }
 
@@ -236,14 +311,22 @@ function GraphCanvas({
         d3
           .forceLink(links)
           .id((d: any) => d.id)
-          .distance(100)
-          .strength(0.2)
+          .distance((d: any) => (d.type === 'structural' ? 50 : 120))
+          .strength((d: any) => (d.type === 'structural' ? 0.5 : 0.1))
       )
-      .force('charge', d3.forceManyBody().strength(-300))
+      .force(
+        'charge',
+        d3
+          .forceManyBody()
+          .strength((d: any) => (d.color === '#4f46e5' ? -1000 : -300))
+      )
       .force('center', d3.forceCenter(width / 2, height / 2))
-      .force('collision', d3.forceCollide().radius(40))
-      .force('x', d3.forceX(width / 2).strength(0.1))
-      .force('y', d3.forceY(height / 2).strength(0.1));
+      .force(
+        'collision',
+        d3.forceCollide().radius((d: any) => (d.color === '#4f46e5' ? 60 : 40))
+      )
+      .force('x', d3.forceX(width / 2).strength(0.05))
+      .force('y', d3.forceY(height / 2).strength(0.05));
 
     // Draw links
     const link = container
@@ -253,11 +336,15 @@ function GraphCanvas({
       .enter()
       .append('line')
       .attr('stroke', (d: any) => {
-        if (d.type === 'similarity') return '#ffd666';
-        if (d.type === 'reference') return '#91d5ff';
+        if (d.type === 'similarity') return '#fbbf24'; // amber-400
+        if (d.type === 'reference') return '#60a5fa'; // blue-400
+        if (d.type === 'dependency') return '#22d3ee'; // cyan-400
+        if (d.type === 'structural') return '#4f46e5'; // indigo-600
         return '#ffffff11';
       })
-      .attr('stroke-opacity', 0.4)
+      .attr('stroke-opacity', (d: any) =>
+        d.type === 'structural' ? 0.1 : d.type === 'dependency' ? 0.2 : 0.4
+      )
       .attr('stroke-width', (d: any) => (d.type === 'similarity' ? 2 : 1))
       .attr('stroke-dasharray', (d: any) =>
         d.type === 'reference' ? '4,4' : null

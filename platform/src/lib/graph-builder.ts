@@ -48,64 +48,99 @@ export class GraphBuilder {
     this.edgesSet = new Set();
   }
 
+  private cleanPath(filePath: string): string {
+    if (!filePath) return '';
+    // Clean up /tmp/repo-.../ prefix more robustly
+    return filePath
+      .replace(/^\/tmp\/repo-[^\/]+\//, '')
+      .replace(/^repo-[^\/]+\//, '');
+  }
+
   private normalizeLabel(filePath: string) {
-    // Simple path normalization without 'path' module
-    return filePath.split('/').pop() || filePath;
+    if (!filePath) return '';
+    const cleaned = this.cleanPath(filePath);
+    return cleaned.split('/').pop() || cleaned;
   }
 
   private extractReferencedPaths(message: string): string[] {
     if (!message || typeof message !== 'string') return [];
     // Basic regex for file paths
     const reRel = /(?:[\w\-.]+\/)+[\w\-.]+\.(?:ts|tsx|js|jsx|py|java|go)/g;
-    return (message.match(reRel) || []) as string[];
+    return (message.match(reRel) || []).map((p) =>
+      this.cleanPath(p)
+    ) as string[];
   }
 
   private getPackageGroup(fp?: string | null) {
     if (!fp) return undefined;
-    const parts = fp.split('/');
-    const pkgIdx = parts.indexOf('packages');
-    if (pkgIdx >= 0 && parts.length > pkgIdx + 1)
-      return `packages/${parts[pkgIdx + 1]}`;
-    if (parts.includes('landing')) return 'landing';
-    if (parts.includes('scripts')) return 'scripts';
-    return parts.length > 1 ? parts[0] : 'root';
+    const cleaned = this.cleanPath(fp);
+    const parts = cleaned.split('/');
+    if (parts.length > 1) {
+      if (parts[0] === 'packages' && parts.length > 2)
+        return `packages/${parts[1]}`;
+      return parts[0];
+    }
+    return 'root';
   }
 
-  addNode(id: string, title = '', value = 5) {
+  addNode(
+    id: string,
+    title = '',
+    value = 5,
+    type = 'file',
+    tokenCost?: number
+  ) {
     if (!id) return;
-    if (!this.nodesMap.has(id)) {
+    const cleanId = this.cleanPath(id);
+    if (!this.nodesMap.has(cleanId)) {
       const node: FileNode = {
-        id,
-        label: this.normalizeLabel(id),
+        id: cleanId,
+        label: this.normalizeLabel(cleanId),
         title,
         value: value || 5,
-        color: '#97c2fc',
+        tokenCost,
+        color: type === 'folder' ? '#4f46e5' : '#97c2fc',
+        group: this.getPackageGroup(cleanId),
       };
-      this.nodesMap.set(id, node);
+      this.nodesMap.set(cleanId, node);
     } else {
-      const node = this.nodesMap.get(id)!;
+      const node = this.nodesMap.get(cleanId)!;
       if (title && !node.title.includes(title)) {
         node.title = (node.title ? node.title + '\n' : '') + title;
       }
       if (value > node.value) node.value = value;
+      if (tokenCost && (!node.tokenCost || tokenCost > node.tokenCost)) {
+        node.tokenCost = tokenCost;
+      }
     }
   }
 
   addEdge(from: string, to: string, type: string = 'link') {
-    if (!from || !to || from === to) return;
-    const key = `${from}->${to}`;
+    if (!from || !to) return;
+    const cleanFrom = this.cleanPath(from);
+    const cleanTo = this.cleanPath(to);
+    if (cleanFrom === cleanTo) return;
+    const key = `${cleanFrom}->${cleanTo}`;
     if (!this.edgesSet.has(key)) {
-      this.edges.push({ source: from, target: to, type });
+      this.edges.push({ source: cleanFrom, target: cleanTo, type });
       this.edgesSet.add(key);
     }
   }
 
   static buildFromReport(report: any): GraphData {
     const builder = new GraphBuilder();
+
+    // Support both normalized and raw formats
+    const breakdown = report.breakdown || {};
+    const raw = report.rawOutput || report;
+
     const fileIssues: Map<
       string,
       { count: number; maxSeverity: IssueSeverity | null; duplicates: number }
     > = new Map();
+
+    // Track domains/folders to create structural nodes
+    const domains = new Set<string>();
 
     const rankSeverity = (s?: string | null): IssueSeverity | null => {
       if (!s) return null;
@@ -119,64 +154,95 @@ export class GraphBuilder {
 
     const bumpIssue = (file: string, sev?: IssueSeverity | null) => {
       if (!file) return;
-      if (!fileIssues.has(file))
-        fileIssues.set(file, { count: 0, maxSeverity: null, duplicates: 0 });
-      const rec = fileIssues.get(file)!;
+      const cleanFile = builder.cleanPath(file);
+      if (!fileIssues.has(cleanFile))
+        fileIssues.set(cleanFile, {
+          count: 0,
+          maxSeverity: null,
+          duplicates: 0,
+        });
+      const rec = fileIssues.get(cleanFile)!;
       rec.count += 1;
       if (sev) {
         const order = { critical: 3, major: 2, minor: 1, info: 0 };
-        if (!rec.maxSeverity || order[sev] > order[rec.maxSeverity])
+        const currentMax = rec.maxSeverity;
+        if (!currentMax || order[sev] > order[currentMax])
           rec.maxSeverity = sev;
       }
     };
 
-    // 1. Process patterns
-    (report.patterns || []).forEach((entry: any) => {
-      const file = entry.fileName;
-      builder.addNode(
+    const processFileNode = (
+      file: string,
+      title: string,
+      value: number,
+      tokenCost?: number
+    ) => {
+      const cleanFile = builder.cleanPath(file);
+      builder.addNode(cleanFile, title, value, 'file', tokenCost);
+      const domain = builder.getPackageGroup(cleanFile);
+      if (domain) {
+        domains.add(domain);
+        builder.addEdge(domain, cleanFile, 'structural');
+      }
+    };
+
+    // 1. Semantic Duplicates
+    const dupDetails =
+      breakdown.semanticDuplicates?.details || raw.duplicates || [];
+    dupDetails.forEach((dup: any) => {
+      const f1 = dup.file1 || dup.fileName;
+      const f2 = dup.file2;
+
+      if (f1) {
+        processFileNode(f1, 'Semantic Pattern', 8);
+        const cleanF1 = builder.cleanPath(f1);
+        if (!fileIssues.has(cleanF1))
+          fileIssues.set(cleanF1, {
+            count: 0,
+            maxSeverity: null,
+            duplicates: 0,
+          });
+        fileIssues.get(cleanF1)!.duplicates += 1;
+      }
+      if (f2) {
+        processFileNode(f2, 'Semantic Pattern', 8);
+        const cleanF2 = builder.cleanPath(f2);
+        if (!fileIssues.has(cleanF2))
+          fileIssues.set(cleanF2, {
+            count: 0,
+            maxSeverity: null,
+            duplicates: 0,
+          });
+        fileIssues.get(cleanF2)!.duplicates += 1;
+        if (f1) builder.addEdge(f1, f2, 'similarity');
+      }
+    });
+
+    // 2. Context & Dependencies (The "Knowledge" part)
+    const contextData = breakdown.contextFragmentation || {};
+    const ctxDetails = contextData.details || raw.context || [];
+    const chains = contextData.chains || [];
+
+    // Map chains for token cost
+    const fileTokenCosts = new Map<string, number>();
+    chains.forEach((c: any) => {
+      if (c.file) fileTokenCosts.set(builder.cleanPath(c.file), c.contextCost);
+    });
+
+    ctxDetails.forEach((ctx: any) => {
+      const file = ctx.file || ctx.fileName;
+      if (!file) return;
+      const cleanFile = builder.cleanPath(file);
+      // contextBudget is the total cost including deps, tokenCost is just the file
+      const contextBudget =
+        ctx.contextBudget || ctx.tokenCost || fileTokenCosts.get(cleanFile);
+
+      processFileNode(
         file,
-        `Issues: ${(entry.issues || []).length}`,
-        entry.metrics?.tokenCost || 5
+        `Knowledge Hub (Deps: ${ctx.dependencyCount || 0})`,
+        12,
+        contextBudget
       );
-
-      (entry.issues || []).forEach((issue: any) => {
-        const sev = rankSeverity(issue.severity || null);
-        bumpIssue(file, sev);
-
-        const refs = builder.extractReferencedPaths(issue.message || '');
-        refs.forEach((ref) => {
-          builder.addNode(ref, 'Referenced file', 5);
-          builder.addEdge(file, ref, 'reference');
-        });
-      });
-    });
-
-    // 2. Duplicates
-    (report.duplicates || []).forEach((dup: any) => {
-      builder.addNode(dup.file1, 'Similarity target', 5);
-      builder.addNode(dup.file2, 'Similarity target', 5);
-      builder.addEdge(dup.file1, dup.file2, 'similarity');
-
-      if (!fileIssues.has(dup.file1))
-        fileIssues.set(dup.file1, {
-          count: 0,
-          maxSeverity: null,
-          duplicates: 0,
-        });
-      if (!fileIssues.has(dup.file2))
-        fileIssues.set(dup.file2, {
-          count: 0,
-          maxSeverity: null,
-          duplicates: 0,
-        });
-      fileIssues.get(dup.file1)!.duplicates += 1;
-      fileIssues.get(dup.file2)!.duplicates += 1;
-    });
-
-    // 3. Context
-    (report.context || []).forEach((ctx: any) => {
-      const file = ctx.file;
-      builder.addNode(file, `Deps: ${ctx.dependencyCount || 0}`, 10);
 
       (ctx.issues || []).forEach((issue: any) => {
         const sev = rankSeverity(
@@ -185,18 +251,31 @@ export class GraphBuilder {
         bumpIssue(file, sev);
       });
 
-      (ctx.relatedFiles || []).forEach((rel: string) => {
-        builder.addNode(rel, 'Related file', 5);
-        builder.addEdge(file, rel, 'related');
-      });
-
       (ctx.dependencyList || []).forEach((dep: string) => {
-        // Only add internal dependencies for clarity
         if (dep.startsWith('.') || dep.startsWith('@aiready')) {
-          builder.addNode(dep, 'Dependency', 2);
+          builder.addNode(dep, 'Internal Dependency', 4);
           builder.addEdge(file, dep, 'dependency');
         }
       });
+    });
+
+    // 3. Generic Issues (naming, signal, etc.)
+    Object.entries(breakdown).forEach(([key, tool]: [string, any]) => {
+      if (key === 'semanticDuplicates' || key === 'contextFragmentation')
+        return;
+
+      (tool.details || []).forEach((issue: any) => {
+        const file = issue.file || issue.fileName || issue.location?.file;
+        if (file) {
+          processFileNode(file, 'Code Quality Node', 6);
+          bumpIssue(file, rankSeverity(issue.severity));
+        }
+      });
+    });
+
+    // Add structural domain nodes
+    domains.forEach((domain) => {
+      builder.addNode(domain, 'Architectural Domain', 100, 'folder');
     });
 
     const colorFor = (sev: IssueSeverity | null) => {
@@ -221,15 +300,29 @@ export class GraphBuilder {
 
     const nodes = Array.from((builder as any).nodesMap.values()) as FileNode[];
     for (const node of nodes) {
+      // Don't override folder colors with issue colors for now
+      const isFolder = builder.edges.some(
+        (e) => e.source === node.id && e.type === 'structural'
+      );
+      if (isFolder) {
+        node.color = '#4f46e5'; // Indigo-600 for domains
+        node.severity = 'healthy';
+        continue;
+      }
+
       const rec = fileIssues.get(node.id);
       if (rec) {
         node.duplicates = rec.duplicates;
         node.color = colorFor(rec.maxSeverity);
-        node.group = builder.getPackageGroup(node.id);
+        node.severity = rec.maxSeverity || 'healthy';
+
         if (rec.maxSeverity === 'critical') criticalIssues += rec.count;
         else if (rec.maxSeverity === 'major') majorIssues += rec.count;
         else if (rec.maxSeverity === 'minor') minorIssues += rec.count;
         else if (rec.maxSeverity === 'info') infoIssues += rec.count;
+      } else {
+        node.severity = 'healthy';
+        if (!node.color) node.color = '#97c2fc';
       }
     }
 
@@ -239,7 +332,9 @@ export class GraphBuilder {
       metadata: {
         timestamp: new Date().toISOString(),
         totalFiles: nodes.length,
-        totalDependencies: (builder as any).edges.length,
+        totalDependencies: (builder as any).edges.filter(
+          (e: any) => e.type === 'dependency'
+        ).length,
         criticalIssues,
         majorIssues,
         minorIssues,

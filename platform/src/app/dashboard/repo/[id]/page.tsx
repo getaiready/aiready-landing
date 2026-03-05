@@ -1,6 +1,11 @@
 import { auth } from '@/app/api/auth/[...nextauth]/route';
 import { redirect, notFound } from 'next/navigation';
-import { getRepository } from '@/lib/db';
+import {
+  getRepository,
+  listUserTeams,
+  listUserRepositories,
+  getLatestAnalysis,
+} from '@/lib/db';
 import RepoDetailClient from './RepoDetailClient';
 
 export default async function RepoDetailPage({
@@ -26,6 +31,20 @@ export default async function RepoDetailPage({
     redirect('/dashboard');
   }
 
+  const teams = await listUserTeams(session.user.id);
+  const userRepos = await listUserRepositories(session.user.id);
+
+  const reposWithScores = userRepos.filter(
+    (r) => r.aiScore !== null && r.aiScore !== undefined
+  );
+  const overallScore =
+    reposWithScores.length > 0
+      ? Math.round(
+          reposWithScores.reduce((sum, r) => sum + (r.aiScore || 0), 0) /
+            reposWithScores.length
+        )
+      : null;
+
   return (
     <RepoDetailClient
       repo={repo}
@@ -35,6 +54,8 @@ export default async function RepoDetailPage({
         email: session.user.email,
         image: session.user.image,
       }}
+      teams={teams}
+      overallScore={overallScore}
     />
   );
 }

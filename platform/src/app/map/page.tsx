@@ -1,0 +1,55 @@
+import { auth } from '@/app/api/auth/[...nextauth]/route';
+import { redirect } from 'next/navigation';
+import { getUserByEmail, listUserRepositories, listUserTeams } from '@/lib/db';
+import CodebaseMap from '@/components/CodebaseMap';
+import PlatformShell from '@/components/PlatformShell';
+
+interface Props {
+  searchParams: Promise<{ repoId?: string }>;
+}
+
+export default async function MapPage({
+  searchParams: searchParamsPromise,
+}: Props) {
+  const session = await auth();
+  const searchParams = await searchParamsPromise;
+
+  if (!session?.user?.email) {
+    redirect('/login');
+  }
+
+  const user = await getUserByEmail(session.user.email);
+  if (!user) redirect('/login');
+
+  const repos = await listUserRepositories(user.id);
+  const teams = await listUserTeams(user.id);
+
+  // Calculate overall AI score
+  const reposWithScores = repos.filter(
+    (r) => r.aiScore !== null && r.aiScore !== undefined
+  );
+  const overallScore =
+    reposWithScores.length > 0
+      ? Math.round(
+          reposWithScores.reduce((sum, r) => sum + (r.aiScore || 0), 0) /
+            reposWithScores.length
+        )
+      : null;
+
+  return (
+    <PlatformShell
+      user={{
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        image: user.image,
+      }}
+      teams={teams}
+      overallScore={overallScore}
+    >
+      <div className="p-4 sm:p-6 lg:p-8 h-full">
+        <CodebaseMap repos={repos} initialRepoId={searchParams.repoId} />
+      </div>
+    </PlatformShell>
+  );
+}

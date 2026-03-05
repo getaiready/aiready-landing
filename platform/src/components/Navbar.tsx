@@ -1,9 +1,8 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
-import { signOut } from 'next-auth/react';
-import { motion } from 'framer-motion';
+import { Team, TeamMember } from '@/lib/db';
+import UserMenu from './UserMenu';
 
 interface Props {
   user: {
@@ -12,66 +11,47 @@ interface Props {
     email?: string | null;
     image?: string | null;
   };
+  teams: (TeamMember & { team: Team })[];
+  currentTeamId: string | 'personal';
+  onSwitchTeam: (teamId: string | 'personal') => void;
   activePage?: 'dashboard' | 'settings' | 'repo';
+  showLogo?: boolean;
 }
 
-export default function Navbar({ user, activePage }: Props) {
+export default function Navbar({
+  user,
+  teams,
+  currentTeamId,
+  onSwitchTeam,
+  activePage,
+  showLogo = false,
+}: Props) {
   return (
-    <header className="glass sticky top-0 z-20 border-b border-indigo-500/20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          <div className="flex items-center gap-4">
+    <header className="sticky top-0 z-20 h-16 border-b border-indigo-500/10 backdrop-blur-md bg-slate-950/20 px-4 sm:px-6 lg:px-8">
+      <div className="h-full flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          {showLogo && (
             <Link href="/dashboard" className="flex items-center">
-              <Image
+              <img
                 src="/logo-text-transparent-dark-theme.png"
                 alt="AIReady"
-                width={140}
-                height={40}
-                className="h-8 w-auto"
-                priority
+                className="h-6 w-auto"
               />
             </Link>
-            <nav className="hidden md:flex items-center gap-6 ml-6">
-              <Link
-                href="/dashboard"
-                className={`text-sm font-medium transition-colors ${
-                  activePage === 'dashboard'
-                    ? 'text-cyan-400 border-b-2 border-cyan-400 pb-0.5'
-                    : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                Dashboard
-              </Link>
-              <Link
-                href="/settings"
-                className={`text-sm font-medium transition-colors ${
-                  activePage === 'settings'
-                    ? 'text-cyan-400 border-b-2 border-cyan-400 pb-0.5'
-                    : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                Settings
-              </Link>
-            </nav>
-          </div>
-          <div className="flex items-center gap-3">
-            {user.image && (
-              <img
-                src={user.image}
-                alt={user.name || 'User'}
-                className="w-8 h-8 rounded-full border-2 border-cyan-500/50"
-              />
-            )}
-            <span className="text-sm text-slate-300 hidden sm:block">
-              {user.name || user.email}
-            </span>
-            <button
-              onClick={() => signOut({ callbackUrl: '/' })}
-              className="text-sm text-slate-400 hover:text-red-400 transition-colors px-3 py-1.5 rounded-lg hover:bg-red-500/10"
-            >
-              Sign out
-            </button>
-          </div>
+          )}
+          <div className="h-4 w-px bg-slate-800 mx-2 hidden lg:block" />
+          <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest hidden sm:block">
+            {activePage || 'Dashboard'}
+          </p>
+        </div>
+
+        <div className="flex items-center gap-4">
+          <UserMenu
+            user={user}
+            teams={teams}
+            currentTeamId={currentTeamId}
+            onSwitchTeam={onSwitchTeam}
+          />
         </div>
       </div>
     </header>

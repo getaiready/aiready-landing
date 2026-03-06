@@ -42,19 +42,30 @@ export async function listRepositoryAnalyses(
 }
 
 export async function getLatestAnalysis(
-  repoId: string
+  repoId: string,
+  includeIncomplete = false
 ): Promise<Analysis | null> {
   const TABLE_NAME = getTableName();
+
+  // If we only want completed ones, we can't easily query by status + timestamp in DDB without a GSI
+  // But we can query the latest few and pick the first completed one
   const result = await doc.send(
     new QueryCommand({
       TableName: TABLE_NAME,
       KeyConditionExpression: 'PK = :pk',
       ExpressionAttributeValues: { ':pk': `ANALYSIS#${repoId}` },
       ScanIndexForward: false,
-      Limit: 1,
+      Limit: 10, // Fetch latest 10 to find a completed one
     })
   );
-  return result.Items?.[0] as Analysis | null;
+
+  const items = (result.Items || []) as Analysis[];
+
+  if (includeIncomplete) {
+    return items[0] || null;
+  }
+
+  return items.find((a) => a.status === 'completed') || items[0] || null;
 }
 
 export async function updateAnalysisStatus(params: {

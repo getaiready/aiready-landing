@@ -54,14 +54,13 @@ export async function GET(
       );
     }
 
-    // To prevent AWS Lambda 6MB payload limit 502 Bad Gateway errors, omit the massive rawOutput field.
-    if (fullAnalysis.rawOutput) {
-      delete fullAnalysis.rawOutput;
-    }
+    // Normalize the report for the frontend (flattens issues, maps keys)
+    // Force normalization to ensure we get the latest structure even if stored in an older format
+    const normalizedAnalysis = normalizeReport(fullAnalysis, true);
 
     return NextResponse.json({
       repo,
-      analysis: fullAnalysis,
+      analysis: normalizedAnalysis,
       timestamp: latestAnalysisRecord.timestamp,
     });
   } catch (error) {

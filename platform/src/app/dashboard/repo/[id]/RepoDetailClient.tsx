@@ -104,116 +104,81 @@ export default function RepoDetailClient({
   if (analysis?.breakdown) {
     Object.entries(analysis.breakdown).forEach(
       ([toolName, toolData]: [string, any]) => {
-        if (Array.isArray(toolData.details)) {
-          toolData.details.forEach((issue: any) => {
-            // Normalize locations (files/lines)
-            const locations: Array<{ path: string; line?: number }> = [];
+        if (!toolData || !toolData.details || !Array.isArray(toolData.details))
+          return;
 
-            // 1. Duplicate patterns (file1/line1, file2/line2)
-            if (issue.file1)
-              locations.push({ path: issue.file1, line: issue.line1 });
-            if (issue.file2)
-              locations.push({ path: issue.file2, line: issue.line2 });
+        toolData.details.forEach((issue: any) => {
+          if (!issue) return;
 
-            // 2. Context analysis & Naming (file/line)
-            if (issue.file && !issue.file1) {
-              locations.push({ path: issue.file, line: issue.line });
-            }
+          // Normalize locations (files/lines)
+          const locations: Array<{ path: string; line?: number }> = [];
 
-            // 3. Generic Issues & Consistency (location.file/location.line)
-            if (issue.location?.file && !issue.file && !issue.file1) {
-              locations.push({
-                path: issue.location.file,
-                line: issue.location.line,
-              });
-            }
+          // 1. Direct location object (standard Issue type)
+          if (issue.location?.file) {
+            locations.push({
+              path: issue.location.file,
+              line: issue.location.line,
+            });
+          }
 
-            // 4. Analysis Results (fileName)
-            if (issue.fileName && locations.length === 0) {
-              locations.push({ path: issue.fileName });
-            }
+          // 2. Tool-specific fields (legacy/various spokes)
+          if (issue.file && !issue.location?.file) {
+            locations.push({ path: issue.file, line: issue.line });
+          }
+          if (issue.file1)
+            locations.push({ path: issue.file1, line: issue.line1 });
+          if (issue.file2)
+            locations.push({ path: issue.file2, line: issue.line2 });
+          if (issue.fileName && locations.length === 0) {
+            locations.push({ path: issue.fileName });
+          }
 
-            // 5. Architecture/Affected Paths (affectedPaths[])
-            if (Array.isArray(issue.affectedPaths)) {
-              issue.affectedPaths.forEach((p: string) =>
-                locations.push({ path: p })
-              );
-            }
+          // 3. Affected paths
+          if (Array.isArray(issue.affectedPaths)) {
+            issue.affectedPaths.forEach((p: string) => {
+              if (p && typeof p === 'string') locations.push({ path: p });
+            });
+          }
 
-            // Normalize message & action
-            let msg = issue.message || issue.description || '';
-            let act =
-              issue.action ||
-              issue.suggestion ||
-              (Array.isArray(issue.recommendations)
-                ? issue.recommendations[0]
-                : issue.recommendation);
+          // Normalize message
+          let msg = issue.message || issue.description || issue.title || '';
 
-            // If we have an action but no message, use the action as the message
-            if (!msg && act && typeof act === 'string') {
+          // Normalize recommendation/action
+          let act =
+            issue.suggestion ||
+            issue.action ||
+            (Array.isArray(issue.recommendations)
+              ? issue.recommendations[0]
+              : issue.recommendation);
+
+          // Fallback logic for messages
+          if (!msg) {
+            if (typeof issue === 'string') msg = issue;
+            else if (act && typeof act === 'string') {
               msg = act;
               act = undefined;
+            } else {
+              msg = 'Issue detected';
             }
+          }
 
-            // Fallback for string issues or completely missing messages
-            if (!msg) {
-              if (typeof issue === 'string') msg = issue;
-              else msg = 'Unknown issue';
-            }
+          // Tool-specific message overrides
+          if (toolName === 'semanticDuplicates' && issue.similarity) {
+            msg = `${issue.patternType ? issue.patternType.charAt(0).toUpperCase() + issue.patternType.slice(1) : 'Duplicate'} (${Math.round(issue.similarity * 100)}% similarity)`;
+          }
 
-            // Tool-specific overrides for better messages
-            if (toolName === 'semanticDuplicates' && issue.similarity) {
-              msg = `${issue.patternType ? issue.patternType.charAt(0).toUpperCase() + issue.patternType.slice(1) : 'Duplicate'} (${Math.round(issue.similarity * 100)}% similarity)`;
-              act = issue.suggestion || issue.action;
-            } else if (
-              toolName === 'contextFragmentation' &&
-              Array.isArray(issue.issues)
-            ) {
-              msg = issue.issues[0] || 'Context fragmentation';
-              act = Array.isArray(issue.recommendations)
-                ? issue.recommendations[0]
-                : issue.action;
-            } else if (toolName === 'aiSignalClarity' && issue.category) {
-              // Map categories to readable messages if message is missing
-              const categoryMap: Record<string, string> = {
-                'magic-literal': 'Magic Literal detected',
-                'boolean-trap': 'Boolean Trap parameter',
-                'ambiguous-name': 'Ambiguous Identifier',
-                'undocumented-export': 'Undocumented Public Export',
-                'implicit-side-effect': 'Implicit Side Effect',
-                'deep-callback': 'Deeply Nested Callback',
-                'overloaded-symbol': 'Overloaded Symbol ambiguity',
-              };
-              if (!issue.message || issue.message === 'Unknown issue') {
-                msg = categoryMap[issue.category] || issue.category;
-              }
-            } else if (toolName === 'testabilityIndex' && issue.dimension) {
-              if (!issue.message || issue.message === 'Unknown issue') {
-                msg = `Low testability in ${issue.dimension} dimension`;
-              }
-            }
-
-            allIssues.push({
-              ...issue,
-              tool: toolName,
-              locations,
-              // Normalize type
-              type: issue.type || issue.category || issue.dimension || 'logic',
-              // Normalize severity: mapping recommendations' 'priority' to 'severity'
-              severity:
-                issue.severity ||
-                (issue.priority === 'high'
-                  ? 'critical'
-                  : issue.priority === 'medium'
-                    ? 'major'
-                    : issue.priority === 'low'
-                      ? 'minor'
-                      : 'major'),
-              message: msg,
-              action: act,
-            });
+          allIssues.push({
+            ...issue,
+            tool: toolName,
+            locations,
+            message: msg,
+            action: act,
+            severity:
+              issue.severity ||
+              (issue.priority === 'high' ? 'critical' : 'major'),
+            type: issue.type || issue.category || 'logic',
           });
-        }
+        });
       }
     );
   }
@@ -228,6 +193,11 @@ export default function RepoDetailClient({
     documentationHealth: 'Documentation Drift',
     dependencyHealth: 'Dependency Health',
     changeAmplification: 'Change Amplification',
+    cognitiveLoad: 'Cognitive Load',
+    patternEntropy: 'Pattern Entropy',
+    conceptCohesion: 'Concept Cohesion',
+    docDrift: 'Documentation Drift',
+    semanticDistance: 'Semantic Distance',
   };
 
   const filteredIssues = allIssues.filter((issue) => {

@@ -933,13 +933,18 @@ function RepoCard({
       {/* Breakdown grid */}
       {analysis?.breakdown && !isScanning && (
         <div className="grid grid-cols-3 gap-2">
-          {Object.entries(analysis.breakdown).map(([key, val]) => (
-            <BreakdownItem
-              key={key}
-              label={formatBreakdownKey(key)}
-              value={val as number}
-            />
-          ))}
+          {Object.entries(analysis.breakdown)
+            .filter(([_, val]) => {
+              const score = typeof val === 'number' ? val : (val as any)?.score;
+              return typeof score === 'number' && score >= 0;
+            })
+            .map(([key, val]) => (
+              <BreakdownItem
+                key={key}
+                label={formatBreakdownKey(key)}
+                value={typeof val === 'number' ? val : (val as any)?.score}
+              />
+            ))}
         </div>
       )}
 
@@ -1103,7 +1108,7 @@ function BreakdownItem({ label, value }: { label: string; value: number }) {
     >
       <div className={`text-xs font-bold ${scoreColor(value)}`}>{value}</div>
       <div
-        className="text-[10px] text-slate-400 leading-tight truncate"
+        className="text-[10px] text-slate-400 leading-tight truncate mt-0.5"
         title={label}
       >
         {label}

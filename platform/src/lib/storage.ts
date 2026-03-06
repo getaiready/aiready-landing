@@ -230,8 +230,10 @@ export async function getAnalysisDownloadUrl(
  * Calculate AI Readiness Score from analysis data
  */
 export function calculateAiScore(data: AnalysisData): number {
-  // Weighted average of breakdown scores (weights sum to 100)
-  const weights = {
+  const b = data.breakdown || {};
+
+  // Weights matching packages/core/src/scoring.ts
+  const weights: Record<string, number> = {
     semanticDuplicates: 22,
     contextFragmentation: 19,
     namingConsistency: 14,
@@ -240,28 +242,29 @@ export function calculateAiScore(data: AnalysisData): number {
     agentGrounding: 10,
     testabilityIndex: 10,
     dependencyHealth: 6,
+    changeAmplification: 8,
+    cognitiveLoad: 7,
+    patternEntropy: 6,
+    conceptCohesion: 6,
+    semanticDistance: 5,
+    docDrift: 8,
   };
 
-  let totalWeightedScore = 0;
+  let weightedSum = 0;
   let totalWeight = 0;
 
   for (const [key, weight] of Object.entries(weights)) {
-    const score = (data.breakdown?.[key as keyof typeof data.breakdown] as any)
-      ?.score;
-    if (typeof score === 'number') {
-      totalWeightedScore += score * weight;
+    const val = (b as any)[key];
+    const score = typeof val === 'number' ? val : (val as any)?.score;
+
+    if (typeof score === 'number' && score > 0) {
+      weightedSum += score * weight;
       totalWeight += weight;
     }
   }
 
-  // Handle changeAmplification if present (dynamically add weight)
-  if (data.breakdown?.changeAmplification?.score !== undefined) {
-    totalWeightedScore += data.breakdown.changeAmplification.score * 5;
-    totalWeight += 5;
-  }
-
   if (totalWeight === 0) return 0;
-  return Math.round(totalWeightedScore / totalWeight);
+  return Math.round(weightedSum / totalWeight);
 }
 
 /**
@@ -281,94 +284,236 @@ export function extractSummary(data: AnalysisData) {
  */
 export function extractBreakdown(data: AnalysisData) {
   const b = data.breakdown || {};
-  return {
-    semanticDuplicates: b.semanticDuplicates?.score || 0,
-    contextFragmentation: b.contextFragmentation?.score || 0,
-    namingConsistency: b.namingConsistency?.score || 0,
-    documentationHealth: b.documentationHealth?.score || 0,
-    dependencyHealth: b.dependencyHealth?.score || 0,
-    aiSignalClarity: b.aiSignalClarity?.score || 0,
-    agentGrounding: b.agentGrounding?.score || 0,
-    testabilityIndex: b.testabilityIndex?.score || 0,
-    changeAmplification: b.changeAmplification?.score || 0,
-    cognitiveLoad: b.cognitiveLoad?.score || 0,
-    patternEntropy: b.patternEntropy?.score || 0,
-    conceptCohesion: b.conceptCohesion?.score || 0,
-    docDrift: b.docDrift?.score || 0,
-    semanticDistance: b.semanticDistance?.score || 0,
+
+  const getScore = (key: string) => {
+    const val = (b as any)[key];
+    if (val === undefined || val === null) return undefined;
+    const score = typeof val === 'number' ? val : (val as any)?.score;
+    // Return if it's a valid number including 0
+    return typeof score === 'number' && score >= 0 ? score : undefined;
   };
+
+  const result: Record<string, number> = {};
+
+  // All possible breakdown keys
+  const keys = [
+    'semanticDuplicates',
+    'contextFragmentation',
+    'namingConsistency',
+    'documentationHealth',
+    'dependencyHealth',
+    'aiSignalClarity',
+    'agentGrounding',
+    'testabilityIndex',
+    'changeAmplification',
+    'cognitiveLoad',
+    'patternEntropy',
+    'conceptCohesion',
+    'semanticDistance',
+    // Fallback/Legacy keys
+    'docDrift',
+  ];
+
+  for (const key of keys) {
+    const score = getScore(key);
+    if (score !== undefined) {
+      result[key] = score;
+    }
+  }
+
+  return result;
 }
 
 /**
  * Normalize raw CLI report data into AnalysisData schema
  */
 export function normalizeReport(raw: any, force = false): AnalysisData {
-  // If we are forcing normalization or missing details, and we have rawOutput, use it as the source
+  // If it's already in the target format AND has breakdown details, and we are not forcing, return as is.
   if (
-    (force || (raw.metadata && raw.summary && raw.breakdown)) &&
-    raw.rawOutput
+    !force &&
+    raw.metadata &&
+    raw.summary &&
+    raw.breakdown &&
+    typeof raw.breakdown === 'object' &&
+    !Array.isArray(raw.breakdown)
   ) {
-    raw = raw.rawOutput;
-  }
-
-  // If it's already in the target format AND has breakdown details, return as is.
-  // We check if at least one tool has details to be sure it's fully normalized.
-  if (!force && raw.metadata && raw.summary && raw.breakdown) {
-    const hasDetails = Object.values(raw.breakdown).some(
-      (tool: any) => Array.isArray(tool.details) && tool.details.length > 0
-    );
-    if (hasDetails) {
+    const values = Object.values(raw.breakdown);
+    if (
+      values.length > 0 &&
+      typeof values[0] === 'object' &&
+      values[0] !== null &&
+      'details' in (values[0] as any)
+    ) {
       return raw as AnalysisData;
     }
   }
 
-  const scoring = raw.scoring || {};
-  const summary = raw.summary || {};
-  const repo = raw.repository || {};
+  // Use rawOutput if available as the source of truth for re-normalization
+  const source = raw.rawOutput || raw;
+  const scoring = source.scoring || {};
+  const summary = source.summary || {};
+  const metadata = source.metadata || {};
+  const repo = metadata.repository || source.repository || {};
 
-  const breakdown: any = {};
   const toolMappings: Record<string, string> = {
+    // CLI Keys
     'pattern-detect': 'semanticDuplicates',
+    patternDetect: 'semanticDuplicates',
+    patterns: 'semanticDuplicates',
+
     'context-analyzer': 'contextFragmentation',
+    contextAnalyzer: 'contextFragmentation',
+    context: 'contextFragmentation',
+
+    'naming-consistency': 'namingConsistency',
+    namingConsistency: 'namingConsistency',
+    'naming-conventions': 'namingConsistency',
     consistency: 'namingConsistency',
-    'ai-signal-clarity': 'aiSignalClarity',
-    'agent-grounding': 'agentGrounding',
-    testability: 'testabilityIndex',
+
     'doc-drift': 'documentationHealth',
+    docDrift: 'documentationHealth',
+    'documentation-health': 'documentationHealth',
+    documentationHealth: 'documentationHealth',
+
     'dependency-health': 'dependencyHealth',
+    dependencyHealth: 'dependencyHealth',
+    'deps-health': 'dependencyHealth',
+
+    'ai-signal-clarity': 'aiSignalClarity',
+    aiSignalClarity: 'aiSignalClarity',
+
+    'agent-grounding': 'agentGrounding',
+    agentGrounding: 'agentGrounding',
+
+    testability: 'testabilityIndex',
+    'testability-index': 'testabilityIndex',
+    testabilityIndex: 'testabilityIndex',
+
     'change-amplification': 'changeAmplification',
+    changeAmplification: 'changeAmplification',
+
+    'cognitive-load': 'cognitiveLoad',
+    cognitiveLoad: 'cognitiveLoad',
+    'pattern-entropy': 'patternEntropy',
+    patternEntropy: 'patternEntropy',
+    'concept-cohesion': 'conceptCohesion',
+    conceptCohesion: 'conceptCohesion',
+    'semantic-distance': 'semanticDistance',
+    semanticDistance: 'semanticDistance',
   };
 
-  if (Array.isArray(scoring.breakdown)) {
-    for (const item of scoring.breakdown) {
-      const platformKey = toolMappings[item.toolName];
-      if (platformKey) {
-        // Generic tool name to camelCase key mapping (e.g. pattern-detect -> patternDetect)
-        const resultKey = item.toolName
-          .split('-')
-          .map((word: string, index: number) =>
-            index === 0 ? word : word.charAt(0).toUpperCase() + word.slice(1)
-          )
-          .join('');
+  const breakdown: any = {};
 
-        const toolData = raw[resultKey];
-        let details: any[] = [];
+  // Aggressively try to find data for every platform key
+  for (const [cliName, platformKey] of Object.entries(toolMappings)) {
+    // Generate potential keys in the raw data
+    const camelCased = cliName
+      .split('-')
+      .map((word: string, index: number) =>
+        index === 0 ? word : word.charAt(0).toUpperCase() + word.slice(1)
+      )
+      .join('');
 
-        if (toolData) {
-          // Every spoke now follows SpokeOutput contract: { results: [], summary: {} }
-          if (Array.isArray(toolData.results)) {
-            details = toolData.results;
-          } else if (Array.isArray(toolData)) {
-            // Fallback for tools that directly return an array
-            details = toolData;
+    // Check possible sources for this tool's data
+    const toolData =
+      source[camelCased] ||
+      source[cliName] ||
+      (source.breakdown && source.breakdown[cliName]) ||
+      (source.breakdown && source.breakdown[camelCased]) ||
+      (source.breakdown && source.breakdown[platformKey]);
+
+    // Check scoring for this tool's score if not in toolData
+    let toolScore = 0;
+    let rawMetrics = {};
+    if (Array.isArray(scoring.breakdown)) {
+      const scoringItem = scoring.breakdown.find(
+        (item: any) =>
+          item.toolName === cliName ||
+          item.toolName === camelCased ||
+          item.toolName === platformKey
+      );
+      if (scoringItem) {
+        toolScore = scoringItem.score || 0;
+        rawMetrics = scoringItem.rawMetrics || {};
+      }
+    }
+
+    // Try to get score from toolData itself if scoring didn't have it
+    if (toolScore === 0 && toolData) {
+      toolScore = toolData.score || toolData.summary?.score || 0;
+    }
+
+    let details: any[] = [];
+    if (toolData) {
+      const resultsArray =
+        toolData.results ||
+        toolData.issues ||
+        (Array.isArray(toolData) ? toolData : []);
+      if (Array.isArray(resultsArray)) {
+        resultsArray.forEach((r: any) => {
+          if (r.issues && Array.isArray(r.issues)) {
+            r.issues.forEach((issue: any) => {
+              const normalized =
+                typeof issue === 'string'
+                  ? { message: issue, severity: 'major' as const }
+                  : { ...issue };
+              if (!normalized.location?.file && r.fileName)
+                normalized.location = {
+                  ...normalized.location,
+                  file: r.fileName,
+                };
+              details.push(normalized);
+            });
+          } else {
+            const normalized =
+              typeof r === 'string'
+                ? { message: r, severity: 'major' as const }
+                : { ...r };
+            if (!normalized.location?.file && normalized.file)
+              normalized.location = {
+                ...normalized.location,
+                file: normalized.file,
+              };
+            details.push(normalized);
           }
-        }
+        });
+      }
+    }
 
+    // If we found data (even if 0 score and 0 issues), add it to the breakdown
+    if (
+      toolData ||
+      toolScore > 0 ||
+      (Array.isArray(scoring.breakdown) &&
+        scoring.breakdown.some((item: any) => item.toolName === cliName))
+    ) {
+      const existing = breakdown[platformKey];
+      if (existing) {
+        // Merge
+        existing.score = Math.max(existing.score, toolScore);
+        if (details.length > 0) {
+          existing.details = [...(existing.details || []), ...details];
+          existing.count = existing.details.length;
+        }
+      } else {
         breakdown[platformKey] = {
-          score: item.score || 0,
-          count: item.rawMetrics?.totalIssues || details.length || 0,
+          score: toolScore,
+          count: details.length || (rawMetrics as any).totalIssues || 0,
           details,
         };
+      }
+    }
+  }
+
+  // Final fallback for missing keys: if input had a flat breakdown, preserve those values
+  const inputBreakdown =
+    raw.breakdown && typeof raw.breakdown === 'object' ? raw.breakdown : {};
+  for (const [k, v] of Object.entries(inputBreakdown)) {
+    if (!breakdown[k]) {
+      if (typeof v === 'number') {
+        breakdown[k] = { score: v, count: 0, details: [] };
+      } else {
+        breakdown[k] = v;
       }
     }
   }
@@ -389,7 +534,7 @@ export function normalizeReport(raw: any, force = false): AnalysisData {
       warnings: summary.warnings || 0,
     },
     breakdown,
-    rawOutput: raw,
+    rawOutput: source,
   };
 }
 

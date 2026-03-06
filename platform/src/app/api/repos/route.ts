@@ -41,13 +41,10 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const teamId = searchParams.get('teamId');
 
-    let repos;
-    if (teamId) {
-      // TODO: Verify user is a member of the team
-      repos = await listTeamRepositories(teamId);
-    } else {
-      repos = await listUserRepositories(userId);
-    }
+    // List of repositories
+    const repos = teamId
+      ? await listTeamRepositories(teamId)
+      : await listUserRepositories(userId);
 
     // Attach latest analysis to each repo
     const reposWithAnalysis = await Promise.all(

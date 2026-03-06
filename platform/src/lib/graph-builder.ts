@@ -209,15 +209,16 @@ export class GraphBuilder {
 
     // 1. Semantic Duplicates
     // Every tool now lives under its camelCase name in 'raw'
-    const patternData = raw.patternDetect || {};
+    const patternData = raw.patternDetect || raw.patterns || {};
     const dupDetails =
       breakdown.semanticDuplicates?.details ||
+      (Array.isArray(patternData.results) ? patternData.results : []) ||
       patternData.duplicates ||
       raw.duplicates ||
       [];
     dupDetails.forEach((dup: any) => {
       // Support both raw DuplicatePattern and AnalysisResult with issues
-      const f1 = dup.file1 || dup.fileName || dup.file;
+      const f1 = dup.file1 || dup.fileName || dup.file || dup.location?.file;
       const f2 = dup.file2;
 
       // Calculate severity for the duplicate itself if it's a raw pattern
@@ -270,10 +271,14 @@ export class GraphBuilder {
     });
 
     // 2. Context & Dependencies (The "Knowledge" part)
-    const contextData =
-      raw.contextAnalyzer || breakdown.contextFragmentation || {};
+    const contextData = raw.contextAnalyzer || raw.context || {};
     const ctxDetails =
-      contextData.results || contextData.details || raw.context || [];
+      breakdown.contextFragmentation?.details ||
+      contextData.results ||
+      contextData.issues || // Added issues fallback
+      (Array.isArray(contextData) ? contextData : []) ||
+      raw.results ||
+      [];
     const chains = contextData.summary?.chains || contextData.chains || [];
 
     // Map chains for token cost

@@ -25,16 +25,16 @@ The CLI will simply iterate over registered tools, dramatically simplifying `pac
 ## 🏗️ Implementation Phases
 
 ### Phase 1: Foundation & Types (`@aiready/core`)
-- [ ] Define `ToolProvider` interface in `@aiready/core/src/types/contract.ts`.
-- [ ] Upgrade `SpokeOutput` Zod schema to be strict and comprehensive.
-- [ ] Create a centralized `ToolRegistry` class or registry array to hold provider definitions.
+- [x] Define `ToolProvider` interface in `@aiready/core/src/types/contract.ts`.
+- [x] Upgrade `SpokeOutput` Zod schema to be strict and comprehensive.
+- [x] Create a centralized `ToolRegistry` class or registry array to hold provider definitions.
 
 ### Phase 2: Refactoring Spokes to Providers (Iterative)
 *Convert existing tools into standard providers without changing their internal logic. This can be done one by one.*
-- [ ] Create Provider wrapper for `@aiready/pattern-detect`.
-- [ ] Create Provider wrapper for `@aiready/context-analyzer`.
-- [ ] Create Provider wrapper for `@aiready/consistency`.
-- [ ] Create Provider wrappers for remaining tools (`doc-drift`, `deps-health`, `ai-signal-clarity`, `agent-grounding`, `testability`, `change-amplification`).
+- [x] Create Provider wrapper for `@aiready/pattern-detect`.
+- [x] Create Provider wrapper for `@aiready/context-analyzer`.
+- [x] Create Provider wrapper for `@aiready/consistency`.
+- [x] Create Provider wrappers for remaining tools (`doc-drift`, `deps-health`, `ai-signal-clarity`, `agent-grounding`, `testability`, `change-amplification`).
 
 ### Phase 3: CLI Migration (`@aiready/cli`)
 - [x] Refactor `analyzeUnified` to map over `ToolRegistry` instead of hardcoded blocks.
@@ -44,7 +44,7 @@ The CLI will simply iterate over registered tools, dramatically simplifying `pac
 ### Phase 4: Integration Testing & CI Enforcement
 - [x] Update `integration-tests/src/cli-integration.test.ts` to dynamically test all registered providers.
 - [x] Update `.github/sub-instructions/adding-new-tool.md` to reflect the new registry approach.
-- [ ] Add CI check to ensure every spoke package exports a valid `ToolProvider`.
+- [x] Add CI check via integration tests to ensure every spoke package exports a valid `ToolProvider`.
 
 ---
 

@@ -37,8 +37,23 @@ export function ScanConfigForm({ repoId, initialSettings, onSave }: Props) {
         exclude: ['**/node_modules/**', '**/dist/**', '**/.git/**'],
       },
       tools: {
-        [ToolName.PatternDetect]: { minSimilarity: 0.8, minLines: 5 },
-        [ToolName.ContextAnalyzer]: { maxDepth: 5, minCohesion: 0.6 },
+        [ToolName.PatternDetect]: {
+          minSimilarity: 0.8,
+          minLines: 5,
+          approx: true,
+          minSharedTokens: 10,
+          maxCandidatesPerBlock: 100,
+        },
+        [ToolName.ContextAnalyzer]: {
+          maxDepth: 5,
+          minCohesion: 0.6,
+          maxFragmentation: 0.4,
+          includeNodeModules: false,
+          focus: 'all',
+        },
+        [ToolName.NamingConsistency]: {
+          disableChecks: [],
+        },
         [ToolName.AiSignalClarity]: {
           checkMagicLiterals: true,
           checkBooleanTraps: true,
@@ -48,7 +63,12 @@ export function ScanConfigForm({ repoId, initialSettings, onSave }: Props) {
           checkDeepCallbacks: true,
         },
         [ToolName.AgentGrounding]: { maxRecommendedDepth: 4 },
+        [ToolName.TestabilityIndex]: { minCoverageRatio: 0.5 },
         [ToolName.DocDrift]: { staleMonths: 6 },
+        [ToolName.DependencyHealth]: { trainingCutoffYear: 2024 },
+      },
+      scoring: {
+        threshold: 70,
       },
     }),
     []
@@ -89,6 +109,10 @@ export function ScanConfigForm({ repoId, initialSettings, onSave }: Props) {
       tools: {
         ...defaultSettings.tools,
         ...initialSettings.tools,
+      },
+      scoring: {
+        ...defaultSettings.scoring,
+        ...initialSettings.scoring,
       },
     };
   }, [initialSettings, defaultSettings]);
@@ -384,6 +408,111 @@ export function ScanConfigForm({ repoId, initialSettings, onSave }: Props) {
                 />
               </div>
             </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t border-slate-800/50">
+              <div
+                onClick={() =>
+                  setSettings({
+                    ...settings,
+                    tools: {
+                      ...settings.tools,
+                      [ToolName.PatternDetect]: {
+                        ...settings.tools?.[ToolName.PatternDetect],
+                        approx:
+                          settings.tools?.[ToolName.PatternDetect]?.approx !==
+                          false,
+                      },
+                    },
+                  })
+                }
+                className={`group relative p-3 rounded-xl border cursor-pointer transition-all flex items-center justify-between ${
+                  settings.tools?.[ToolName.PatternDetect]?.approx !== false
+                    ? 'bg-amber-500/10 border-amber-500/30 text-amber-500'
+                    : 'bg-slate-900 border-slate-800 text-slate-500'
+                }`}
+              >
+                <span className="text-[10px] font-bold uppercase">
+                  Approximate Match
+                </span>
+                <div
+                  className={`w-2.5 h-2.5 rounded-full ${
+                    settings.tools?.[ToolName.PatternDetect]?.approx !== false
+                      ? 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]'
+                      : 'bg-slate-800'
+                  }`}
+                />
+                <div className="absolute left-0 bottom-full mb-2 hidden group-hover:block w-48 p-3 bg-slate-900 border border-slate-800 rounded-xl text-[10px] text-slate-400 z-50 shadow-2xl normal-case">
+                  Allow fuzzy matching for logic clones that have minor naming
+                  or spacing variations.
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[9px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                  Min Tokens
+                  <div className="group relative">
+                    <InfoIcon className="w-3 h-3 text-slate-700 cursor-help" />
+                    <div className="absolute left-0 bottom-full mb-2 hidden group-hover:block w-48 p-3 bg-slate-900 border border-slate-800 rounded-xl text-[10px] text-slate-400 z-50 shadow-2xl normal-case">
+                      Minimum number of shared structural tokens. Increase for
+                      fewer but higher-confidence matches.
+                    </div>
+                  </div>
+                </label>
+                <input
+                  type="number"
+                  value={
+                    settings.tools?.[ToolName.PatternDetect]?.minSharedTokens ||
+                    10
+                  }
+                  onChange={(e) =>
+                    setSettings({
+                      ...settings,
+                      tools: {
+                        ...settings.tools,
+                        [ToolName.PatternDetect]: {
+                          ...settings.tools?.[ToolName.PatternDetect],
+                          minSharedTokens: parseInt(e.target.value),
+                        },
+                      },
+                    })
+                  }
+                  className="w-full bg-slate-900/50 border border-slate-800 rounded-xl p-2 text-xs text-amber-500 focus:outline-none"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[9px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                  Max Candidates
+                  <div className="group relative">
+                    <InfoIcon className="w-3 h-3 text-slate-700 cursor-help" />
+                    <div className="absolute left-0 bottom-full mb-2 hidden group-hover:block w-48 p-3 bg-slate-900 border border-slate-800 rounded-xl text-[10px] text-slate-400 z-50 shadow-2xl normal-case">
+                      Limits the number of duplication comparisons per block.
+                      Lower values speed up scans on massive repos.
+                    </div>
+                  </div>
+                </label>
+                <input
+                  type="number"
+                  value={
+                    settings.tools?.[ToolName.PatternDetect]
+                      ?.maxCandidatesPerBlock || 100
+                  }
+                  onChange={(e) =>
+                    setSettings({
+                      ...settings,
+                      tools: {
+                        ...settings.tools,
+                        [ToolName.PatternDetect]: {
+                          ...settings.tools?.[ToolName.PatternDetect],
+                          maxCandidatesPerBlock: parseInt(e.target.value),
+                        },
+                      },
+                    })
+                  }
+                  className="w-full bg-slate-900/50 border border-slate-800 rounded-xl p-2 text-xs text-amber-500 focus:outline-none"
+                />
+              </div>
+            </div>
           </div>
 
           {/* Context Analyzer */}
@@ -481,6 +610,128 @@ export function ScanConfigForm({ repoId, initialSettings, onSave }: Props) {
                   }
                   className="w-full accent-amber-500"
                 />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4 border-t border-slate-800/50">
+              <div className="space-y-4">
+                <label className="block text-sm font-bold text-slate-400 flex items-center justify-between">
+                  <span className="flex items-center gap-2">
+                    Max Fragmentation
+                    <div className="group relative">
+                      <InfoIcon className="w-4 h-4 text-slate-600 cursor-help" />
+                      <div className="absolute left-0 bottom-full mb-2 hidden group-hover:block w-64 p-3 bg-slate-900 border border-slate-800 rounded-xl text-xs text-slate-400 z-50 shadow-2xl">
+                        Threshold for logic dispersion. Higher values allow
+                        functionality to be more spread across the codebase
+                        before flagging.
+                      </div>
+                    </div>
+                  </span>
+                  <span className="text-amber-500">
+                    {Math.round(
+                      (settings.tools?.[ToolName.ContextAnalyzer]
+                        ?.maxFragmentation || 0.4) * 100
+                    )}
+                    %
+                  </span>
+                </label>
+                <input
+                  type="range"
+                  min="0.1"
+                  max="0.9"
+                  step="0.05"
+                  value={
+                    settings.tools?.[ToolName.ContextAnalyzer]
+                      ?.maxFragmentation || 0.4
+                  }
+                  onChange={(e) =>
+                    setSettings({
+                      ...settings,
+                      tools: {
+                        ...settings.tools,
+                        [ToolName.ContextAnalyzer]: {
+                          ...settings.tools?.[ToolName.ContextAnalyzer],
+                          maxFragmentation: parseFloat(e.target.value),
+                        },
+                      },
+                    })
+                  }
+                  className="w-full accent-amber-500"
+                />
+              </div>
+
+              <div className="flex flex-col justify-end gap-4">
+                <div
+                  onClick={() =>
+                    setSettings({
+                      ...settings,
+                      tools: {
+                        ...settings.tools,
+                        [ToolName.ContextAnalyzer]: {
+                          ...settings.tools?.[ToolName.ContextAnalyzer],
+                          includeNodeModules:
+                            !settings.tools?.[ToolName.ContextAnalyzer]
+                              ?.includeNodeModules,
+                        },
+                      },
+                    })
+                  }
+                  className={`group relative p-3 rounded-xl border cursor-pointer transition-all flex items-center justify-between ${
+                    settings.tools?.[ToolName.ContextAnalyzer]
+                      ?.includeNodeModules
+                      ? 'bg-cyan-500/10 border-cyan-500/30 text-cyan-500'
+                      : 'bg-slate-900 border-slate-800 text-slate-500'
+                  }`}
+                >
+                  <span className="text-[10px] font-bold uppercase">
+                    Scan Node Modules
+                  </span>
+                  <div
+                    className={`w-2.5 h-2.5 rounded-full ${
+                      settings.tools?.[ToolName.ContextAnalyzer]
+                        ?.includeNodeModules
+                        ? 'bg-cyan-500 shadow-[0_0_8px_rgba(6,182,212,0.5)]'
+                        : 'bg-slate-800'
+                    }`}
+                  />
+                  <div className="absolute left-0 bottom-full mb-2 hidden group-hover:block w-48 p-3 bg-slate-900 border border-slate-800 rounded-xl text-[10px] text-slate-400 z-50 shadow-2xl normal-case">
+                    Deep-dive into 3rd party dependency source code. WARNING:
+                    Significantly increases scan time and context usage.
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest whitespace-nowrap">
+                    Analysis Focus:
+                  </span>
+                  <div className="flex bg-slate-900 rounded-lg p-1 border border-slate-800 w-full">
+                    {['all', 'cohesion', 'fragmentation'].map((f) => (
+                      <button
+                        key={f}
+                        onClick={() =>
+                          setSettings({
+                            ...settings,
+                            tools: {
+                              ...settings.tools,
+                              [ToolName.ContextAnalyzer]: {
+                                ...settings.tools?.[ToolName.ContextAnalyzer],
+                                focus: f,
+                              },
+                            },
+                          })
+                        }
+                        className={`flex-1 text-[9px] uppercase font-bold py-1 px-2 rounded-md transition-all ${
+                          (settings.tools?.[ToolName.ContextAnalyzer]?.focus ||
+                            'all') === f
+                            ? 'bg-slate-700 text-cyan-400'
+                            : 'text-slate-500 hover:text-slate-300'
+                        }`}
+                      >
+                        {f}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -662,6 +913,215 @@ export function ScanConfigForm({ repoId, initialSettings, onSave }: Props) {
                   }
                   className="w-full accent-amber-500"
                 />
+              </div>
+            </div>
+          </div>
+
+          {/* Naming Consistency & Standards */}
+          <div className="space-y-6">
+            <h3 className="text-sm font-bold text-slate-500 uppercase tracking-widest border-b border-slate-800 pb-2">
+              Naming & Consistency
+            </h3>
+            <div className="space-y-4">
+              <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                Disable Specific Checks
+                <div className="group relative">
+                  <InfoIcon className="w-3 h-3 text-slate-700 cursor-help" />
+                  <div className="absolute left-0 bottom-full mb-2 hidden group-hover:block w-64 p-3 bg-slate-900 border border-slate-800 rounded-xl text-xs text-slate-400 z-50 shadow-2xl normal-case">
+                    Turn off specific naming rules if your project has a unique
+                    style or many legacy abbreviations.
+                  </div>
+                </div>
+              </label>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {[
+                  'single-letter',
+                  'abbreviation',
+                  'convention-mix',
+                  'unclear',
+                ].map((check) => (
+                  <div
+                    key={check}
+                    onClick={() => {
+                      const disabled =
+                        settings.tools?.[ToolName.NamingConsistency]
+                          ?.disableChecks || [];
+                      const newDisabled = disabled.includes(check)
+                        ? disabled.filter((c: string) => c !== check)
+                        : [...disabled, check];
+                      setSettings({
+                        ...settings,
+                        tools: {
+                          ...settings.tools,
+                          [ToolName.NamingConsistency]: {
+                            ...settings.tools?.[ToolName.NamingConsistency],
+                            disableChecks: newDisabled,
+                          },
+                        },
+                      });
+                    }}
+                    className={`p-2 rounded-lg border text-[10px] font-bold uppercase text-center cursor-pointer transition-all ${
+                      (
+                        settings.tools?.[ToolName.NamingConsistency]
+                          ?.disableChecks || []
+                      ).includes(check)
+                        ? 'bg-slate-800 border-slate-700 text-slate-500 line-through'
+                        : 'bg-cyan-500/10 border-cyan-500/20 text-cyan-400'
+                    }`}
+                  >
+                    {check}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Testability & Dependencies */}
+          <div className="space-y-6">
+            <h3 className="text-sm font-bold text-slate-500 uppercase tracking-widest border-b border-slate-800 pb-2">
+              Tests & Dependencies
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="space-y-4">
+                <label className="block text-sm font-bold text-slate-400 flex items-center justify-between">
+                  <span className="flex items-center gap-2">
+                    Min Coverage Ratio
+                    <div className="group relative">
+                      <InfoIcon className="w-4 h-4 text-slate-600 cursor-help" />
+                      <div className="absolute left-0 bottom-full mb-2 hidden group-hover:block w-64 p-3 bg-slate-900 border border-slate-800 rounded-xl text-xs text-slate-400 z-50 shadow-2xl">
+                        Target ratio of source files to test files. Higher
+                        values enforce stricter verification standards.
+                      </div>
+                    </div>
+                  </span>
+                  <span className="text-amber-500">
+                    {Math.round(
+                      (settings.tools?.[ToolName.TestabilityIndex]
+                        ?.minCoverageRatio || 0.5) * 100
+                    )}
+                    %
+                  </span>
+                </label>
+                <input
+                  type="range"
+                  min="0.1"
+                  max="1.0"
+                  step="0.05"
+                  value={
+                    settings.tools?.[ToolName.TestabilityIndex]
+                      ?.minCoverageRatio || 0.5
+                  }
+                  onChange={(e) =>
+                    setSettings({
+                      ...settings,
+                      tools: {
+                        ...settings.tools,
+                        [ToolName.TestabilityIndex]: {
+                          ...settings.tools?.[ToolName.TestabilityIndex],
+                          minCoverageRatio: parseFloat(e.target.value),
+                        },
+                      },
+                    })
+                  }
+                  className="w-full accent-amber-500"
+                />
+              </div>
+
+              <div className="space-y-4">
+                <label className="block text-sm font-bold text-slate-400 flex items-center justify-between">
+                  <span className="flex items-center gap-2">
+                    Package Cutoff Year
+                    <div className="group relative">
+                      <InfoIcon className="w-4 h-4 text-slate-600 cursor-help" />
+                      <div className="absolute left-0 bottom-full mb-2 hidden group-hover:block w-64 p-3 bg-slate-900 border border-slate-800 rounded-xl text-xs text-slate-400 z-50 shadow-2xl">
+                        Flags dependencies that haven't been updated since this
+                        year as "stale" or "high risk".
+                      </div>
+                    </div>
+                  </span>
+                  <span className="text-amber-500">
+                    {settings.tools?.[ToolName.DependencyHealth]
+                      ?.trainingCutoffYear || 2024}
+                  </span>
+                </label>
+                <input
+                  type="range"
+                  min="2015"
+                  max={new Date().getFullYear()}
+                  step="1"
+                  value={
+                    settings.tools?.[ToolName.DependencyHealth]
+                      ?.trainingCutoffYear || 2024
+                  }
+                  onChange={(e) =>
+                    setSettings({
+                      ...settings,
+                      tools: {
+                        ...settings.tools,
+                        [ToolName.DependencyHealth]: {
+                          ...settings.tools?.[ToolName.DependencyHealth],
+                          trainingCutoffYear: parseInt(e.target.value),
+                        },
+                      },
+                    })
+                  }
+                  className="w-full accent-amber-500"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Global Scoring Section */}
+          <div className="pt-8 border-t border-slate-800">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-2 bg-green-500/10 rounded-xl border border-green-500/20">
+                <ChartIcon className="w-5 h-5 text-green-500" />
+              </div>
+              <h2 className="text-xl font-bold">Global Quality Gate</h2>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="space-y-4">
+                <label className="block text-sm font-bold text-slate-400 flex items-center justify-between">
+                  <span className="flex items-center gap-2">
+                    Pass/Fail Threshold
+                    <div className="group relative">
+                      <InfoIcon className="w-4 h-4 text-slate-600 cursor-help" />
+                      <div className="absolute left-0 bottom-full mb-2 hidden group-hover:block w-64 p-3 bg-slate-900 border border-slate-800 rounded-xl text-xs text-slate-400 z-50 shadow-2xl">
+                        Minimum overall AI-Readiness score required to pass CI
+                        checks and PR status gates.
+                      </div>
+                    </div>
+                  </span>
+                  <span className="text-green-500 font-mono text-lg">
+                    {settings.scoring?.threshold || 70}
+                  </span>
+                </label>
+                <input
+                  type="range"
+                  min="30"
+                  max="95"
+                  step="5"
+                  value={settings.scoring?.threshold || 70}
+                  onChange={(e) =>
+                    setSettings({
+                      ...settings,
+                      scoring: {
+                        ...settings.scoring,
+                        threshold: parseInt(e.target.value),
+                      },
+                    })
+                  }
+                  className="w-full accent-green-500"
+                />
+              </div>
+              <div className="flex items-center justify-center p-6 bg-slate-900/30 rounded-2xl border border-slate-800 border-dashed">
+                <p className="text-[10px] text-slate-500 text-center uppercase leading-loose tracking-widest">
+                  Adjusting these parameters changes the strictness of your{' '}
+                  <span className="text-cyan-500">AIReady Score</span>. <br />
+                  Lower thresholds reduce noise; higher thresholds uplift
+                  standards.
+                </p>
               </div>
             </div>
           </div>

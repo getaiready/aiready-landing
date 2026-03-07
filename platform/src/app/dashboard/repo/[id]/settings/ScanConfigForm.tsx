@@ -161,9 +161,29 @@ export function ScanConfigForm({
       const blocks = fileCount * 5;
       const totalComparisons = (blocks * blocks) / 2;
       const approx = settings.tools?.[ToolName.PatternDetect]?.approx !== false;
-      const effectiveComparisons = approx
-        ? totalComparisons / 15
-        : totalComparisons;
+      const maxCandidates =
+        settings.tools?.[ToolName.PatternDetect]?.maxCandidatesPerBlock || 100;
+
+      let effectiveComparisons = totalComparisons;
+
+      if (approx) {
+        // Approximate mode uses hashing/indexing, dramatically reducing the search space
+        // We estimate it prunes ~95% of comparisons
+        effectiveComparisons = totalComparisons * 0.05;
+
+        // Even in approx mode, maxCandidates limits the final verification step
+        effectiveComparisons = Math.min(
+          effectiveComparisons,
+          blocks * maxCandidates
+        );
+      } else {
+        // Exhaustive mode: impact of maxCandidates is still linear on the search space
+        // but it's starting from the full N^2 base
+        effectiveComparisons = Math.min(
+          totalComparisons,
+          blocks * maxCandidates * 5 // Factor of 5 because exhaustive check is deeper
+        );
+      }
 
       // ~50,000 comparisons per second
       seconds += effectiveComparisons / 50000;

@@ -7,6 +7,7 @@
 For the past seven weeks, we’ve been dissecting a quiet crisis: the explosion of unmanaged, AI-generated code that is currently flooding our repositories. We’ve called it the **AI Code Debt Tsunami**.
 
 We’ve seen how:
+
 1.  **Semantic Duplicate Detection** identifies logic that’s been rewritten in five different ways.
 2.  **Context Budgeting** reveals the hidden token cost of deep import chains.
 3.  **Visualization** turns abstract architectural decay into impossible-to-ignore physical shapes.
@@ -15,9 +16,9 @@ But as we conclude this series, I want to move away from the "debt" metaphor and
 
 ## The Convergence: AI-Friendly is Human-Friendly
 
-For years, "clean code" was defined by what made it readable for humans. We optimized for clarity, maintainability, and cognitive load. 
+For years, "clean code" was defined by what made it readable for humans. We optimized for clarity, maintainability, and cognitive load.
 
-Then came the AI era. Suddenly, we started optimizing for "vibe"—getting the AI to generate something that works *now*, regardless of its structural integrity. This created a rift between code that ships fast and code that lasts.
+Then came the AI era. Suddenly, we started optimizing for "vibe"—getting the AI to generate something that works _now_, regardless of its structural integrity. This created a rift between code that ships fast and code that lasts.
 
 But here is the secret we've discovered while building **AIReady**:
 
@@ -32,12 +33,15 @@ Making code AI-ready isn’t a separate chore. It’s the ultimate forcing funct
 We started this project to help teams measure what traditional tools missed. But measurement is only the first step. Here is what we're building next:
 
 ### 1. Auto-Remediation Plans
+
 Identifying a "Hairball" or an "Orphan" is great, but fixing it is hard. We’re working on AI-powered refactoring agents that can take an AIReady report and generate a step-by-step migration plan—automating the cleanup as fast as the debt was created.
 
 ### 2. The Visual Orchestrator
+
 Our D3-based visualizer is evolving from a static map into a control center. Imagine dragging nodes on the graph to propose architectural changes, and having the AI automatically rewrite the imports and move the files to match the new "shape."
 
 ### 3. Continuous Integration Benchmarking
+
 We’re launching a SaaS tier that tracks your AI-readiness score over time. Every PR will get a "Context Delta"—exactly how many tokens this change adds or removes from your global context budget.
 
 ## A Vision for the Future
@@ -60,4 +64,4 @@ Thank you for following along with this series. The tsunami is here, but togethe
 
 ---
 
-*Peng Cao is the founder of [receiptclaimer](https://receiptclaimer.com) and creator of [aiready](https://github.com/caopengau/aiready-cli), an open-source suite for measuring and optimising codebases for AI adoption.*
+_Peng Cao is the founder of [receiptclaimer](https://receiptclaimer.com) and creator of [aiready](https://github.com/caopengau/aiready-cli), an open-source suite for measuring and optimising codebases for AI adoption._

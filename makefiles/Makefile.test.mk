@@ -12,6 +12,7 @@ include $(MAKEFILE_DIR)/Makefile.shared.mk
 test: ## Run tests for all packages (noninteractive)
 	@$(call log_step,Running tests for all packages (noninteractive)...) 
 	@if command -v turbo >/dev/null 2>&1; then \
+		unset npm_config_loglevel; \
 		CI=1 turbo run test test-contract $(SILENT_TURBO); \
 	else \
 		CI=1 $(PNPM) --no-interactive $(SILENT_PNPM) test; \
@@ -50,6 +51,7 @@ test-platform: ## Run unit tests for platform
 test-contract: ## Run Spoke-to-Hub contract tests (Tier 1)
 	@$(call log_step,Running Tier 1 Contract Tests...)
 	@if command -v turbo >/dev/null 2>&1; then \
+		unset npm_config_loglevel; \
 		CI=1 turbo run test:contract $(SILENT_TURBO); \
 	else \
 		$(PNPM) -r exec -- vitest run contract.test.ts --passWithNoTests; \

@@ -9,9 +9,9 @@
   ],
   "scripts": {
     "prebuild": "make clean-cache",
-    "build": "turbo run build",
-    "test": "turbo run test",
-    "lint": "turbo run lint",
+    "build": "./scripts/build.sh build",
+    "test": "./scripts/build.sh test",
+    "lint": "./scripts/build.sh lint",
     "dev": "turbo run dev --filter=!@aiready/platform --concurrency 11",
     "clean": "turbo run clean && rm -rf node_modules",
     "consume-reports": "node ./scripts/consume-aiready-reports.js",

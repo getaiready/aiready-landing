@@ -36,6 +36,7 @@ fix: ## Run ESLint --fix and Prettier format
 lint: ## Run ESLint on all packages
 	@$(call log_info,Running ESLint on all packages...)
 	@if command -v turbo >/dev/null 2>&1; then \
+		unset npm_config_loglevel; \
 		turbo run lint $(SILENT_TURBO); \
 	else \
 		$(MAKE) $(MAKE_PARALLEL) $(LINT_LEAF); \

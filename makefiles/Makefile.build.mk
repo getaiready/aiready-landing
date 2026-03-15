@@ -8,6 +8,7 @@ include makefiles/Makefile.shared.mk
 build: ## Build all packages
 	@$(call log_step,Building all packages...)
 	@if command -v turbo >/dev/null 2>&1; then \
+		unset npm_config_loglevel; \
 		turbo run build $(SILENT_TURBO); \
 	else \
 		$(PNPM) run build $(SILENT_PNPM); \

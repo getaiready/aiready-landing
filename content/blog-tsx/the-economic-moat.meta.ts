@@ -14,7 +14,7 @@ const meta = {
   ],
   readingTime: '6 min read',
   slug: 'the-economic-moat',
-  cover: '/agentic-shift-series-8.png',
+  cover: '/agentic-shift-series-3.png',
   ogImage: '',
 };
 

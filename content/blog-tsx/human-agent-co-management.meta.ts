@@ -13,7 +13,7 @@ const meta = {
   ],
   readingTime: '6 min read',
   slug: 'human-agent-co-management',
-  cover: '/agentic-shift-series-11.png',
+  cover: '/agentic-shift-series-9.png',
   ogImage: '',
 };
 

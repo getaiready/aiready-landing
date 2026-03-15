@@ -14,7 +14,7 @@ const meta = {
   ],
   readingTime: '8 min read',
   slug: 'the-neural-spine',
-  cover: '/agentic-shift-series-10.png',
+  cover: '/agentic-shift-series-4.png',
   ogImage: '',
 };
 

@@ -7,7 +7,7 @@ const meta = {
   tags: ['Infrastructure', 'CDK', 'Monorepo', 'Agentic Readiness', 'AIReady'],
   readingTime: '6 min read',
   slug: 'living-repository',
-  cover: '/agentic-shift-series-7.png',
+  cover: '/agentic-shift-series-12.png',
   ogImage: '',
 };
 

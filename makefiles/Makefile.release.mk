@@ -193,12 +193,12 @@ release-clawmore: release-clawmore-prod ## Alias -> release-clawmore-prod
 release-clawmore-dev: ## Deploy ClawMore to dev stage: TYPE=patch|minor|major
 	@$(validate_type)
 	@$(MAKE) -C $(ROOT_DIR) version-clawmore-$(TYPE)
-	@$(call tag_dev_release,$(CLAWMORE_DIR),clawmore,clawmore)
+	@$(call commit_and_tag_app,$(CLAWMORE_DIR),clawmore,clawmore,clawmore-dev)
 	@$(call run_if_enabled,$(RELEASE_PRECHECKS),$(MAKE) -C $(ROOT_DIR) release-checks-clawmore,clawmore checks)
 	@$(call run_if_enabled,$(RELEASE_BUILD),cd $(CLAWMORE_DIR) && pnpm build,clawmore build)
 	@$(call run_if_enabled,$(RELEASE_DEPLOY),$(MAKE) -C $(ROOT_DIR) deploy-clawmore-dev,clawmore dev deploy)
 	@$(call run_if_enabled,$(RELEASE_E2E),$(MAKE) -C $(ROOT_DIR) test-clawmore-e2e-local,clawmore dev E2E)
-	@$(call run_if_enabled,$(RELEASE_PUSH),cd $(ROOT_DIR) && git push origin $(TARGET_BRANCH) --follow-tags,git push)
+	@$(call run_if_enabled,$(RELEASE_PUSH),$(MAKE) sync,sync and push)
 	@$(call log_success,Dev release finished for clawmore)
 
 release-clawmore-prod: ## Release ClawMore to production: TYPE=patch|minor|major
@@ -211,7 +211,7 @@ release-clawmore-prod: ## Release ClawMore to production: TYPE=patch|minor|major
 	@$(call run_if_enabled,$(RELEASE_VERIFY),$(MAKE) -C $(ROOT_DIR) clawmore-verify || $(call log_warning,Verification timed out - may still be deploying),clawmore verify)
 	@$(call run_if_enabled,$(RELEASE_E2E),$(MAKE) -C $(ROOT_DIR) test-clawmore-e2e-prod,clawmore prod E2E)
 	@$(call run_if_enabled,$(RELEASE_PUBLISH),$(MAKE) -C $(ROOT_DIR) publish-clawmore OWNER=$(OWNER),publish clawmore)
-	@$(call run_if_enabled,$(RELEASE_PUSH),cd $(ROOT_DIR) && git push origin $(TARGET_BRANCH) --follow-tags,git push)
+	@$(call run_if_enabled,$(RELEASE_PUSH),$(MAKE) sync,sync and push)
 	@$(call log_success,Release finished for clawmore)
 
 ###############################################################################
@@ -223,11 +223,11 @@ release-landing: release-landing-prod ## Alias -> release-landing-prod
 release-landing-dev: ## Release landing to dev stage: TYPE=patch|minor|major
 	@$(validate_type)
 	@$(MAKE) -C $(ROOT_DIR) version-landing-$(TYPE)
-	@$(call tag_dev_release,$(LANDING_DIR),landing,@aiready/landing)
+	@$(call commit_and_tag_app,$(LANDING_DIR),landing,@aiready/landing,landing-dev)
 	@$(call run_if_enabled,$(RELEASE_PRECHECKS),$(MAKE) -C $(ROOT_DIR) release-checks-landing,landing checks)
 	@$(call run_if_enabled,$(RELEASE_BUILD),cd $(LANDING_DIR) && pnpm build,landing build)
 	@$(call run_if_enabled,$(RELEASE_DEPLOY),$(MAKE) -C $(ROOT_DIR) deploy-landing-dev,landing dev deploy)
-	@$(call run_if_enabled,$(RELEASE_PUSH),cd $(ROOT_DIR) && git push origin $(TARGET_BRANCH) --follow-tags,git push)
+	@$(call run_if_enabled,$(RELEASE_PUSH),$(MAKE) sync,sync and push)
 	@$(call log_success,Dev release finished for @aiready/landing)
 
 release-landing-prod: ## Release landing to production: TYPE=patch|minor|major
@@ -239,7 +239,7 @@ release-landing-prod: ## Release landing to production: TYPE=patch|minor|major
 	@$(call run_if_enabled,$(RELEASE_DEPLOY),$(MAKE) -C $(ROOT_DIR) deploy-landing-prod,landing production deploy)
 	@$(call run_if_enabled,$(RELEASE_VERIFY),$(MAKE) -C $(ROOT_DIR) landing-verify VERIFY_RETRIES=3 VERIFY_WAIT=10 || $(call log_warning,Verification timed out - CloudFront may still be propagating),landing verify)
 	@$(call run_if_enabled,$(RELEASE_PUBLISH),$(MAKE) -C $(ROOT_DIR) publish-landing OWNER=$(OWNER),publish landing)
-	@$(call run_if_enabled,$(RELEASE_PUSH),cd $(ROOT_DIR) && git push origin $(TARGET_BRANCH) --follow-tags,git push)
+	@$(call run_if_enabled,$(RELEASE_PUSH),$(MAKE) sync,sync and push)
 	@$(call log_success,Release finished for @aiready/landing)
 
 ###############################################################################
@@ -249,10 +249,10 @@ release-landing-prod: ## Release landing to production: TYPE=patch|minor|major
 release-platform-dev: ## Release platform to dev stage: TYPE=patch|minor|major
 	@$(validate_type)
 	@$(MAKE) -C $(ROOT_DIR) version-platform-$(TYPE)
-	@$(call tag_dev_release,$(PLATFORM_DIR),platform,@aiready/platform)
+	@$(call commit_and_tag_app,$(PLATFORM_DIR),platform,@aiready/platform,platform-dev)
 	@$(call run_if_enabled,$(RELEASE_BUILD),cd $(PLATFORM_DIR) && pnpm build,platform build)
 	@$(call run_if_enabled,$(RELEASE_DEPLOY),$(MAKE) -C $(ROOT_DIR) deploy-platform,platform dev deploy)
-	@$(call run_if_enabled,$(RELEASE_PUSH),cd $(ROOT_DIR) && git push origin $(TARGET_BRANCH) --follow-tags,git push)
+	@$(call run_if_enabled,$(RELEASE_PUSH),$(MAKE) sync,sync and push)
 	@$(call log_success,Dev release finished for @aiready/platform)
 
 release-platform: ## Release platform to production: TYPE=patch|minor|major
@@ -263,7 +263,7 @@ release-platform: ## Release platform to production: TYPE=patch|minor|major
 	@$(call run_if_enabled,$(RELEASE_PRECHECKS),$(MAKE) -C $(ROOT_DIR) release-checks-platform,platform checks)
 	@$(call run_if_enabled,$(RELEASE_DEPLOY),$(MAKE) -C $(ROOT_DIR) deploy-platform-prod,platform production deploy)
 	@$(call run_if_enabled,$(RELEASE_VERIFY),$(MAKE) -C $(ROOT_DIR) platform-verify || $(call log_warning,Verification failed - platform may still be deploying),platform verify)
-	@$(call run_if_enabled,$(RELEASE_PUSH),cd $(ROOT_DIR) && git push origin $(TARGET_BRANCH) --follow-tags,git push)
+	@$(call run_if_enabled,$(RELEASE_PUSH),$(MAKE) sync,sync and push)
 	@$(call log_success,Release finished for @aiready/platform)
 
 ###############################################################################
@@ -276,7 +276,7 @@ release-vscode: ## Release VS Code extension: TYPE=patch|minor|major
 	@$(call commit_and_tag_app,$(EXTENSION_DIR),vscode-extension,vscode-extension,vscode-extension)
 	@$(call run_if_enabled,$(RELEASE_BUILD),cd $(EXTENSION_DIR) && pnpm build,vscode build)
 	@$(call run_if_enabled,$(RELEASE_PUBLISH),$(MAKE) -C $(ROOT_DIR) publish-vscode TYPE=$(TYPE) && $(MAKE) -C $(ROOT_DIR) publish-vscode-sync OWNER=$(OWNER),publish vscode)
-	@$(call run_if_enabled,$(RELEASE_PUSH),cd $(ROOT_DIR) && git push origin $(TARGET_BRANCH) --follow-tags,git push)
+	@$(call run_if_enabled,$(RELEASE_PUSH),$(MAKE) sync,sync and push)
 	@$(call log_success,Release finished for VS Code extension)
 
 ###############################################################################
@@ -312,7 +312,7 @@ release-one: ## Release one npm spoke: SPOKE=name TYPE=patch|minor|major
 	@if [ "$(SPOKE)" = "cli" ] && [ "$(RELEASE_PUBLISH)" = "1" ]; then \
 		$(MAKE) -C $(ROOT_DIR) docker-push; \
 	fi
-	@$(call run_if_enabled,$(RELEASE_PUSH),cd $(ROOT_DIR) && git push origin $(TARGET_BRANCH) --follow-tags,git push)
+	@$(call run_if_enabled,$(RELEASE_PUSH),$(MAKE) sync,sync and push)
 	@$(call log_success,Release finished for @aiready/$(SPOKE))
 
 # Build+test once, then version-bump -> publish in order: core -> middle -> cli
@@ -335,7 +335,7 @@ release-all: ## Release all npm spokes: TYPE=patch|minor|major
 	@$(call run_if_enabled,$(RELEASE_PUBLISH),$(call log_step,Phase 6: Publish middle spokes in parallel...) && $(MAKE) $(MAKE_PARALLEL) $(addprefix release-spoke-,$(MIDDLE_SPOKES)),publish middle spokes)
 	@$(call run_if_enabled,$(RELEASE_PUBLISH),$(call log_step,Phase 7: Publish CLI...) && $(MAKE) -C $(ROOT_DIR) npm-publish SPOKE=$(CLI_SPOKE) && $(MAKE) -C $(ROOT_DIR) publish SPOKE=$(CLI_SPOKE) OWNER=$(OWNER),publish cli)
 	@$(call run_if_enabled,$(RELEASE_PUBLISH),$(MAKE) -C $(ROOT_DIR) docker-push,publish docker)
-	@$(call run_if_enabled,$(RELEASE_PUSH),cd $(ROOT_DIR) && git push origin $(TARGET_BRANCH) --follow-tags,git push)
+	@$(call run_if_enabled,$(RELEASE_PUSH),$(MAKE) sync,sync and push)
 	@$(call log_success,All spokes released: core -> middle -> cli)
 
 ###############################################################################

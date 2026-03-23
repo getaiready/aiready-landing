@@ -76,7 +76,7 @@ export async function handler(event: SQSEvent) {
           openaiApiKey: process.env.OPENAI_API_KEY,
           anthropicApiKey: process.env.MINIMAX_API_KEY,
           anthropicBaseUrl: 'https://api.minimax.io/anthropic',
-          model: process.env.MINIMAX_MODEL || 'anthropic/MiniMax-M2.7',
+          model: process.env.MINIMAX_MODEL || 'MiniMax-M2.7',
         },
       });
 

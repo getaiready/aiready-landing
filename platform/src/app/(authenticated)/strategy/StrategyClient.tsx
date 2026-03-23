@@ -20,8 +20,8 @@ interface Props {
 
 export default function StrategyClient({
   user,
-  teams,
-  overallScore,
+  teams: _teams,
+  overallScore: _overallScore,
 }: Props) {
   const router = useRouter();
 

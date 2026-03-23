@@ -10,7 +10,6 @@ describe('visual utilities', () => {
     });
 
     it('should handle NaN gracefully', () => {
-      // @ts-expect-error - Testing invalid input
       expect(createBarChart(NaN, 10)).toBe('░░░░░░░░░░');
     });
 

@@ -1,8 +1,6 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { toast as _toast } from 'sonner';
-import _PlatformShell from '@/components/PlatformShell';
 import { ScanConfigForm } from '../dashboard/repo/[id]/settings/ScanConfigForm';
 import { updateScanStrategy } from '@/lib/scan-strategy';
 import { SettingsIcon } from '@/components/Icons';
@@ -16,14 +14,14 @@ interface Props {
     image?: string | null;
     scanConfig?: any;
   };
-  _teams: (TeamMember & { team: Team })[];
-  _overallScore: number | null;
+  teams: (TeamMember & { team: Team })[];
+  overallScore: number | null;
 }
 
 export default function StrategyClient({
   user,
-  teams: _teams,
-  overallScore: _overallScore,
+  teams,
+  overallScore,
 }: Props) {
   const router = useRouter();
 

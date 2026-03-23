@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import type { ApiKey, Team, TeamMember } from '@/lib/db';
+import type { AIReadyConfig } from '@aiready/core/client';
 import { ProfileSection } from './components/ProfileSection';
 import { IntegrationsSection } from './components/IntegrationsSection';
 import { ApiAccessSection } from './components/ApiAccessSection';

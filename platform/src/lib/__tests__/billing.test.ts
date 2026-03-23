@@ -33,6 +33,14 @@ vi.mock('stripe', () => {
   };
 });
 
+// Mock SST Resource
+vi.mock('sst', () => ({
+  Resource: {
+    ProPrice: { id: 'price_pro_mock' },
+    TeamPrice: { id: 'price_team_mock' },
+  },
+}));
+
 describe('Billing Utilities', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -92,7 +100,7 @@ describe('Billing Utilities', () => {
         expect.objectContaining({
           customer_email: userEmail,
           metadata: { teamId, plan },
-          line_items: [expect.objectContaining({ price: 'price_team' })],
+          line_items: [expect.objectContaining({ price: 'price_team_mock' })],
         })
       );
     });

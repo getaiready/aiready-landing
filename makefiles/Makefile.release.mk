@@ -309,9 +309,6 @@ release-one: ## Release one npm spoke: SPOKE=name TYPE=patch|minor|major
 	@$(call commit_and_tag)
 	@$(call run_if_enabled,$(RELEASE_PRECHECKS),$(MAKE) -C $(ROOT_DIR) release-checks-spoke SPOKE=$(SPOKE),spoke checks)
 	@$(call run_if_enabled,$(RELEASE_PUBLISH),$(MAKE) -C $(ROOT_DIR) npm-publish SPOKE=$(SPOKE) && $(MAKE) -C $(ROOT_DIR) publish SPOKE=$(SPOKE) OWNER=$(OWNER),publish spoke)
-	@if [ "$(SPOKE)" = "cli" ] && [ "$(RELEASE_PUBLISH)" = "1" ]; then \
-		$(MAKE) -C $(ROOT_DIR) docker-push; \
-	fi
 	@$(call run_if_enabled,$(RELEASE_PUSH),$(MAKE) sync,sync and push)
 	@$(call log_success,Release finished for @aiready/$(SPOKE))
 
@@ -334,7 +331,6 @@ release-all: ## Release all npm spokes: TYPE=patch|minor|major
 	@$(call run_if_enabled,$(RELEASE_PUBLISH),$(call log_step,Phase 5: Publish core...) && $(MAKE) -C $(ROOT_DIR) npm-publish SPOKE=$(CORE_SPOKE) && $(MAKE) -C $(ROOT_DIR) publish SPOKE=$(CORE_SPOKE) OWNER=$(OWNER),publish core)
 	@$(call run_if_enabled,$(RELEASE_PUBLISH),$(call log_step,Phase 6: Publish middle spokes in parallel...) && $(MAKE) $(MAKE_PARALLEL) $(addprefix release-spoke-,$(MIDDLE_SPOKES)),publish middle spokes)
 	@$(call run_if_enabled,$(RELEASE_PUBLISH),$(call log_step,Phase 7: Publish CLI...) && $(MAKE) -C $(ROOT_DIR) npm-publish SPOKE=$(CLI_SPOKE) && $(MAKE) -C $(ROOT_DIR) publish SPOKE=$(CLI_SPOKE) OWNER=$(OWNER),publish cli)
-	@$(call run_if_enabled,$(RELEASE_PUBLISH),$(MAKE) -C $(ROOT_DIR) docker-push,publish docker)
 	@$(call run_if_enabled,$(RELEASE_PUSH),$(MAKE) sync,sync and push)
 	@$(call log_success,All spokes released: core -> middle -> cli)
 

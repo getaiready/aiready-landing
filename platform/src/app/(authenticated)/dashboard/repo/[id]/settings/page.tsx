@@ -42,37 +42,35 @@ export default async function RepoSettingsPage({ params }: Props) {
   }
 
   return (
-    <PlatformShell user={session.user} teams={teams} activePage="repo">
-      <div className="p-4 sm:p-6 lg:p-8 space-y-8 text-white max-w-5xl mx-auto">
-        <Breadcrumb
-          items={[
-            { label: 'Dashboard', href: '/dashboard' },
-            { label: repo.name, href: `/dashboard/repo/${repo.id}` },
-            { label: 'Settings', href: `/dashboard/repo/${repo.id}/settings` },
-          ]}
-        />
+    <div className="p-4 sm:p-6 lg:p-8 space-y-8 text-white max-w-5xl mx-auto">
+      <Breadcrumb
+        items={[
+          { label: 'Dashboard', href: '/dashboard' },
+          { label: repo.name, href: `/dashboard/repo/${repo.id}` },
+          { label: 'Settings', href: `/dashboard/repo/${repo.id}/settings` },
+        ]}
+      />
 
-        <div className="space-y-2">
-          <h1 className="text-4xl font-black tracking-tight bg-gradient-to-r from-white to-slate-500 bg-clip-text text-transparent">
-            Scan Strategy
-          </h1>
-          <p className="text-slate-400">
-            Customize how AIReady analyzes{' '}
-            <span className="text-cyan-400 font-mono italic">{repo.name}</span>.
-            Adjust these parameters to uplift standards or fine-tune for your
-            specific stack.
-          </p>
-        </div>
-
-        <ScanConfigForm
-          repoId={repo.id}
-          initialSettings={repo.scanConfig || null}
-          onSave={updateSettings}
-          fileCount={fileCount}
-          lastExecutionTime={lastExecutionTime}
-          lastSettings={lastSettings}
-        />
+      <div className="space-y-2">
+        <h1 className="text-4xl font-black tracking-tight bg-gradient-to-r from-white to-slate-500 bg-clip-text text-transparent">
+          Scan Strategy
+        </h1>
+        <p className="text-slate-400">
+          Customize how AIReady analyzes{' '}
+          <span className="text-cyan-400 font-mono italic">{repo.name}</span>.
+          Adjust these parameters to uplift standards or fine-tune for your
+          specific stack.
+        </p>
       </div>
-    </PlatformShell>
+
+      <ScanConfigForm
+        repoId={repo.id}
+        initialSettings={repo.scanConfig || null}
+        onSave={updateSettings}
+        fileCount={fileCount}
+        lastExecutionTime={lastExecutionTime}
+        lastSettings={lastSettings}
+      />
+    </div>
   );
 }

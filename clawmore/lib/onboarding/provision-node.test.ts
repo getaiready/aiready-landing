@@ -104,7 +104,7 @@ describe('ProvisioningOrchestrator', () => {
       })
     );
 
-    // Verify Secret Injection (4 secrets should be injected)
+    // Verify Secret Injection (4 base secrets)
     expect(mockOctokit.actions.createOrUpdateRepoSecret).toHaveBeenCalledTimes(
       4
     );
@@ -118,5 +118,75 @@ describe('ProvisioningOrchestrator', () => {
       repoName: 'test-repo',
     });
     expect(ensureUserMetadata).toHaveBeenCalledWith('test@example.com');
+  });
+
+  it('should inject SST secrets when provided', async () => {
+    const options = {
+      userEmail: 'test@example.com',
+      userName: 'Test User',
+      repoName: 'test-repo',
+      githubToken: 'fake-token',
+      coEvolutionOptIn: false,
+      sstSecrets: {
+        TelegramBotToken: 'bot-token-123',
+        MiniMaxApiKey: 'minimax-key-456',
+        GitHubToken: 'gh-token-789',
+      },
+    };
+
+    const result = await orchestrator.provisionNode(options);
+
+    expect(result.accountId).toBe('acc-456');
+
+    // 4 base secrets + 3 SST secrets = 7 total
+    expect(mockOctokit.actions.createOrUpdateRepoSecret).toHaveBeenCalledTimes(
+      7
+    );
+
+    // Verify SST secrets were injected with SST_SECRET_ prefix
+    const secretCalls = mockOctokit.actions.createOrUpdateRepoSecret.mock.calls;
+    const secretNames = secretCalls.map((call: any) => call[0].secret_name);
+    expect(secretNames).toContain('SST_SECRET_TelegramBotToken');
+    expect(secretNames).toContain('SST_SECRET_MiniMaxApiKey');
+    expect(secretNames).toContain('SST_SECRET_GitHubToken');
+  });
+
+  it('should skip SST secrets when not provided', async () => {
+    const options = {
+      userEmail: 'test@example.com',
+      userName: 'Test User',
+      repoName: 'test-repo',
+      githubToken: 'fake-token',
+      coEvolutionOptIn: true,
+    };
+
+    await orchestrator.provisionNode(options);
+
+    // Only 4 base secrets, no SST secrets
+    expect(mockOctokit.actions.createOrUpdateRepoSecret).toHaveBeenCalledTimes(
+      4
+    );
+  });
+
+  it('should skip empty SST secret values', async () => {
+    const options = {
+      userEmail: 'test@example.com',
+      userName: 'Test User',
+      repoName: 'test-repo',
+      githubToken: 'fake-token',
+      coEvolutionOptIn: true,
+      sstSecrets: {
+        TelegramBotToken: 'bot-token-123',
+        MiniMaxApiKey: '', // empty, should be skipped
+        GitHubToken: 'gh-token-789',
+      },
+    };
+
+    await orchestrator.provisionNode(options);
+
+    // 4 base secrets + 2 non-empty SST secrets = 6 total
+    expect(mockOctokit.actions.createOrUpdateRepoSecret).toHaveBeenCalledTimes(
+      6
+    );
   });
 });

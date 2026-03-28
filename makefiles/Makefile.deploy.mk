@@ -139,6 +139,15 @@ clawmore-logs: ## Show ClawMore logs (runs sst dev)
 		export AWS_PROFILE=$${AWS_PROFILE:-$(AWS_PROFILE)} && \
 		sst dev
 
+clawmore-warm-pool: verify-aws-account ## Seed the ClawMore AWS account warm pool (Usage: make clawmore-warm-pool SIZE=3)
+	@$(call log_step,Seeding ClawMore warm account pool (Target: $(or $(SIZE),3)))
+	@cd clawmore && \
+		set -a && [ -f .env ] && . ./.env || true && set +a && \
+		export AWS_PROFILE=$${AWS_PROFILE:-$(AWS_PROFILE)} && \
+		export AWS_REGION=$${AWS_REGION:-$(AWS_REGION)} && \
+		$(PNPM) warm-pool $(or $(SIZE),3)
+	@$(call log_success,Warm pool seeding complete)
+
 ##@ Platform Deployment
 
 deploy-platform: verify-aws-account ## Deploy platform to AWS (dev environment)
@@ -213,7 +222,7 @@ platform-verify: ## Verify platform is accessible
 	fi
 	@echo ""
 
-deploy-platform-remove: ## Remove platform deployment (dev)
+deploy-platform-remove: verify-aws-account ## Remove platform deployment (dev)
 	@$(call log_warning,Removing platform deployment from AWS (dev))
 	@cd platform && \
 		set -a && [ -f .env.dev ] && . ./.env.dev || true && set +a && \
@@ -282,7 +291,7 @@ domain-status: ## Check Cloudflare zone status and nameservers
 		fi; \
 		curl -s -H "Authorization: Bearer $$CLOUDFLARE_API_TOKEN" "https://api.cloudflare.com/client/v4/zones?name=$${DOMAIN_NAME:-getaiready.dev}&account.id=$$CLOUDFLARE_ACCOUNT_ID" | jq '{success, result: ( .result[] | {id, name, status, name_servers, account: .account.id} )}' || true
 
-leads-export: ## Export submissions from S3 to local CSV
+leads-export: verify-aws-account ## Export submissions from S3 to local CSV
 	@$(call log_step,Exporting leads from S3)
 	@mkdir -p .aiready/leads/submissions
 	@bucket=$$(cd landing && AWS_PROFILE=$(AWS_PROFILE) AWS_REGION=$(AWS_REGION) sst list | awk '/submissionsBucket:/ {print $$2}'); \
@@ -298,7 +307,7 @@ leads-export: ## Export submissions from S3 to local CSV
 leads-open: ## Open leads folder
 	@open .aiready/leads 2>/dev/null || xdg-open .aiready/leads 2>/dev/null || echo "Path: .aiready/leads"
 
-landing-cleanup: ## Clean up stale AWS resources from old deployments
+landing-cleanup: verify-aws-account ## Clean up stale AWS resources from old deployments
 	@$(call log_warning,Scanning for stale AWS resources)
 	@echo "$(CYAN)Checking CloudFront distributions...$(NC)"
 	@OLD_DISTS=$$(aws cloudfront list-distributions --profile $(AWS_PROFILE) 2>/dev/null | \
@@ -348,7 +357,7 @@ define wrangler_cmd
 	npx wrangler $(2) -c wrangler.toml)
 endef
 
-monitor-secrets: ## Set AWS secrets for all health monitors
+monitor-secrets: verify-aws-account ## Set AWS secrets for all health monitors
 	@$(call log_step,Setting AWS secrets for health monitors)
 	@AWS_KEY=$$(aws configure get aws_access_key_id --profile $(AWS_PROFILE)); \
 	AWS_SEC=$$(aws configure get aws_secret_access_key --profile $(AWS_PROFILE)); \

@@ -129,27 +129,32 @@ export default function ClawMoreClient({ apiUrl, dict }: ClawMoreClientProps) {
     {
       question: 'What is ClawMore?',
       answer:
-        'ClawMore is an autonomous platform that manages your AWS infrastructure and automatically improves your codebase. It monitors your system, detects issues, and applies fixes — so you can focus on building features.',
+        'ClawMore is an AI-powered platform that automatically monitors, optimizes, and fixes your AWS infrastructure. It saves you time by handling routine maintenance and improvements so you can focus on building your product.',
     },
     {
       question: 'How does the auto-fix system work?',
       answer:
-        'ClawMore runs a continuous loop: it scans your logs and performance data, identifies areas for improvement, generates a code fix using AI, and commits it to your repository. You review and approve every change.',
+        'ClawMore continuously scans your infrastructure and code for issues. When it finds something that can be improved, it generates a fix using AI and creates a pull request for your review. You maintain full control - nothing is changed without your approval.',
     },
     {
       question: 'Is it safe to connect my AWS account?',
       answer:
-        'Yes. ClawMore runs in your own AWS account (BYOC), not ours. It uses strict permission boundaries that prevent it from accessing data outside your infrastructure. You maintain full control.',
+        'Absolutely. ClawMore uses read-only permissions by default and follows the principle of least privilege. Your code and data stay in your AWS account. We never access your sensitive information, and you can revoke access at any time.',
     },
     {
-      question: 'What does the $29/month include?',
+      question: 'What does the $29/month Pro plan include?',
       answer:
-        'Your subscription includes managed infrastructure, a web dashboard, automated code improvements, CI/CD integration, and $10/month in AI credits for code fixes. You can cancel anytime.',
+        "The Pro plan includes unlimited repositories and scans, $10/month in AI credits for auto-fixes, priority support, and advanced monitoring. It's perfect for growing teams who want to automate their infrastructure management.",
     },
     {
       question: 'Can I try it for free?',
       answer:
-        "Absolutely. The free tier includes our full analysis CLI, 3 repositories, and 10 scans per month. No credit card required. Upgrade when you're ready.",
+        'Yes! We offer a free tier with 3 repositories and 10 scans per month - no credit card required. You can also start a 14-day free trial of our Pro plan to experience all features before committing.',
+    },
+    {
+      question: "What happens if I'm not satisfied?",
+      answer:
+        "We offer a 30-day money-back guarantee. If you're not completely satisfied with ClawMore within the first 30 days, we'll refund your payment in full - no questions asked.",
     },
   ];
 
@@ -193,19 +198,20 @@ export default function ClawMoreClient({ apiUrl, dict }: ClawMoreClientProps) {
 
           <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 rounded-sm border border-cyber-blue/40 bg-cyber-blue/10 text-cyber-blue text-[10px] font-mono uppercase tracking-[0.2em] sm:tracking-[0.3em] mb-6 sm:mb-12 shadow-[0_0_30px_rgba(0,224,255,0.15)] backdrop-blur-sm animate-current-flow">
             <Activity className="w-3 h-3" />
-            <span>{dict.hero.badge}</span>
+            <span>Automated AWS Management • AI-Powered Fixes</span>
           </div>
 
           {/* Cache-buster: v2-gradient */}
           <h1 className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black tracking-tighter mb-4 sm:mb-10 bg-gradient-to-r from-[#00e0ff] to-[#bc00ff] bg-clip-text text-transparent leading-[1.1] sm:leading-[1.1] pb-3 sm:pb-4 drop-shadow-[0_10px_60px_rgba(0,0,0,1)]">
-            {dict.hero.title1}
+            Your AWS Infrastructure
             <br />
-            <span className="italic">{dict.hero.title2}</span>{' '}
-            {dict.hero.title3}
+            <span className="italic">Manages Itself</span>
           </h1>
 
           <p className="text-2xl sm:text-2xl text-white/90 max-w-2xl mx-auto mb-10 sm:mb-14 leading-relaxed font-light drop-shadow-[0_2px_10px_rgba(0,0,0,1)]">
-            {dict.hero.description}
+            ClawMore automatically monitors, optimizes, and fixes your AWS
+            infrastructure. Save hours of manual work and reduce costs with
+            AI-powered automation.
           </p>
 
           <div className="w-full max-w-lg sm:max-w-none flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-4 sm:gap-8">
@@ -213,14 +219,14 @@ export default function ClawMoreClient({ apiUrl, dict }: ClawMoreClientProps) {
               href="/signup"
               className="w-full sm:w-auto px-8 sm:px-12 py-4 sm:py-5 rounded-sm bg-white text-black hover:bg-cyber-blue transition-all font-black uppercase tracking-widest flex items-center justify-center gap-3 group shadow-[0_0_50px_rgba(255,255,255,0.2)] text-center"
             >
-              {dict.common.startFree}
+              Start Free Trial
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
             <button
               onClick={() => openModal('beta')}
               className="w-full sm:w-auto px-8 sm:px-12 py-4 sm:py-5 rounded-sm border border-white/20 bg-white/5 hover:bg-white/10 transition-all font-bold uppercase tracking-widest text-[13px] sm:text-[14px] backdrop-blur-md"
             >
-              {dict.common.managedBetaAccess}
+              See Live Demo
             </button>
           </div>
         </div>
@@ -236,6 +242,49 @@ export default function ClawMoreClient({ apiUrl, dict }: ClawMoreClientProps) {
         />
       </Modal>
 
+      {/* Social Proof Section */}
+      <section className="py-16 bg-black/20 border-y border-white/5">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-2xl sm:text-3xl font-black mb-4 tracking-tighter">
+              Trusted by Development Teams
+            </h2>
+            <p className="text-zinc-400 max-w-2xl mx-auto">
+              Join hundreds of teams saving time and reducing costs with
+              automated infrastructure management
+            </p>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 items-center justify-items-center opacity-60">
+            <div className="text-zinc-500 font-bold text-lg">Startup A</div>
+            <div className="text-zinc-500 font-bold text-lg">Agency B</div>
+            <div className="text-zinc-500 font-bold text-lg">Enterprise C</div>
+            <div className="text-zinc-500 font-bold text-lg">Team D</div>
+          </div>
+          <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+            <div className="p-6">
+              <div className="text-4xl font-black text-cyber-blue mb-2">
+                500+
+              </div>
+              <div className="text-zinc-400 text-sm">Repositories Managed</div>
+            </div>
+            <div className="p-6">
+              <div className="text-4xl font-black text-cyber-blue mb-2">
+                10,000+
+              </div>
+              <div className="text-zinc-400 text-sm">Issues Auto-Fixed</div>
+            </div>
+            <div className="p-6">
+              <div className="text-4xl font-black text-cyber-blue mb-2">
+                50+
+              </div>
+              <div className="text-zinc-400 text-sm">
+                Hours Saved Per Team Monthly
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Core Pillars */}
       <section
         className="py-16 sm:py-24 relative scroll-mt-24 sm:scroll-mt-28"
@@ -243,16 +292,26 @@ export default function ClawMoreClient({ apiUrl, dict }: ClawMoreClientProps) {
       >
         <div className="absolute inset-0 bg-[linear-gradient(to_bottom,_transparent,_rgba(0,255,163,0.02),_transparent)] pointer-events-none" />
         <div className="container mx-auto px-4 relative">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl sm:text-4xl font-black mb-4 tracking-tighter">
+              How ClawMore Works For You
+            </h2>
+            <p className="text-zinc-400 max-w-2xl mx-auto">
+              Simple, automated infrastructure management that saves time and
+              reduces costs
+            </p>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="glass-card p-6 sm:p-10 hover:border-cyber-blue/30 transition-all group">
               <div className="w-14 h-14 rounded-sm bg-cyber-blue/10 flex items-center justify-center text-cyber-blue mb-8 border border-cyber-blue/20 group-hover:scale-110 transition-transform">
                 <RefreshCcw className="w-7 h-7" />
               </div>
               <h3 className="text-2xl font-bold mb-4 tracking-tight">
-                {dict.pillars.autonomous.title}
+                Automatic Monitoring
               </h3>
               <p className="text-zinc-500 leading-relaxed text-sm">
-                {dict.pillars.autonomous.desc}
+                24/7 monitoring of your AWS infrastructure. We detect issues
+                before they become problems and fix them automatically.
               </p>
             </div>
 
@@ -261,10 +320,12 @@ export default function ClawMoreClient({ apiUrl, dict }: ClawMoreClientProps) {
                 <Cpu className="w-7 h-7" />
               </div>
               <h3 className="text-2xl font-bold mb-4 tracking-tight">
-                {dict.pillars.neural.title}
+                AI-Powered Fixes
               </h3>
               <p className="text-zinc-500 leading-relaxed text-sm">
-                {dict.pillars.neural.desc}
+                Our AI analyzes your code and infrastructure to suggest and
+                apply improvements. Save hours of manual debugging and
+                optimization.
               </p>
             </div>
 
@@ -273,10 +334,11 @@ export default function ClawMoreClient({ apiUrl, dict }: ClawMoreClientProps) {
                 <ShieldCheck className="w-7 h-7" />
               </div>
               <h3 className="text-2xl font-bold mb-4 tracking-tight">
-                {dict.pillars.byoc.title}
+                Secure & Compliant
               </h3>
               <p className="text-zinc-500 leading-relaxed text-sm">
-                {dict.pillars.byoc.desc}
+                Your code stays in your AWS account. We enforce serverless best
+                practices and maintain security compliance automatically.
               </p>
             </div>
           </div>
@@ -395,94 +457,103 @@ export default function ClawMoreClient({ apiUrl, dict }: ClawMoreClientProps) {
       >
         <div className="container mx-auto px-4">
           <div className="text-center mb-12 sm:mb-20">
-            <div className="text-purple-400 font-mono text-xs uppercase tracking-[0.5em] mb-4">
-              {dict.pricing.model}
-            </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black mb-6 tracking-tighter italic">
-              {dict.pricing.title}
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black mb-6 tracking-tighter">
+              Simple, Transparent Pricing
             </h2>
-            <p className="text-zinc-400 font-mono text-sm uppercase tracking-widest font-bold">
-              {dict.pricing.subtitle}
+            <p className="text-zinc-400 max-w-2xl mx-auto">
+              Start free, scale as you grow. No hidden fees, no surprises.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {/* Starter Tier */}
+            {/* Free Tier */}
             <div className="glass-card p-6 sm:p-8 flex flex-col border-white/10 hover:border-white/20 transition-all">
               <div className="mb-8">
                 <h4 className="text-zinc-400 font-mono text-xs uppercase tracking-widest font-black mb-2">
-                  {dict.pricing.managed.name}
+                  Free
                 </h4>
                 <div className="text-4xl sm:text-5xl font-black tracking-tight text-white">
-                  {dict.pricing.managed.price}
+                  $0
                   <span className="text-xl font-normal text-zinc-500">
-                    {dict.pricing.managed.period}
+                    /month
                   </span>
                 </div>
                 <p className="text-[10px] font-mono text-zinc-500 uppercase mt-3 tracking-tighter font-bold">
-                  {dict.pricing.managed.subtext}
+                  Perfect for trying out ClawMore
                 </p>
               </div>
               <ul className="space-y-4 mb-10 flex-grow">
-                {dict.pricing.managed.features.map(
-                  (feature: string, idx: number) => (
-                    <li
-                      key={idx}
-                      className="flex items-center gap-3 text-sm text-zinc-100"
-                    >
-                      <Zap className="w-4 h-4 text-zinc-400 shrink-0" />{' '}
-                      {feature}
-                    </li>
-                  )
-                )}
+                <li className="flex items-center gap-3 text-sm text-zinc-100">
+                  <Zap className="w-4 h-4 text-zinc-400 shrink-0" /> 3
+                  repositories
+                </li>
+                <li className="flex items-center gap-3 text-sm text-zinc-100">
+                  <Zap className="w-4 h-4 text-zinc-400 shrink-0" /> 10 scans
+                  per month
+                </li>
+                <li className="flex items-center gap-3 text-sm text-zinc-100">
+                  <Zap className="w-4 h-4 text-zinc-400 shrink-0" /> Basic
+                  reporting
+                </li>
+                <li className="flex items-center gap-3 text-sm text-zinc-100">
+                  <Zap className="w-4 h-4 text-zinc-400 shrink-0" /> Community
+                  support
+                </li>
               </ul>
               <Link
                 href="/signup"
                 className="w-full py-4 rounded-sm bg-white hover:bg-zinc-200 transition-all text-black text-xs font-black uppercase text-center tracking-widest"
               >
-                Start Starter Plan
+                Start Free
               </Link>
             </div>
 
             {/* Pro Tier - MOST POPULAR */}
             <div className="glass-card p-6 sm:p-8 border-cyber-blue/30 bg-cyber-blue/[0.03] relative flex flex-col hover:border-cyber-blue/50 transition-all shadow-[0_0_80px_rgba(0,224,255,0.08)]">
-              {dict.pricing.pro.badge && (
-                <div className="absolute top-0 right-4 sm:right-8 -translate-y-1/2 px-3 py-1.5 rounded-sm bg-cyber-blue text-black text-[9px] font-black uppercase tracking-[0.3em] shadow-[0_0_20px_rgba(0,224,255,0.3)] z-10">
-                  {dict.pricing.pro.badge}
-                </div>
-              )}
+              <div className="absolute top-0 right-4 sm:right-8 -translate-y-1/2 px-3 py-1.5 rounded-sm bg-cyber-blue text-black text-[9px] font-black uppercase tracking-[0.3em] shadow-[0_0_20px_rgba(0,224,255,0.3)] z-10">
+                Most Popular
+              </div>
               <div className="mb-8">
                 <h4 className="text-cyber-blue font-mono text-xs uppercase tracking-widest font-black mb-2">
-                  {dict.pricing.pro.name}
+                  Pro
                 </h4>
                 <div className="text-4xl sm:text-5xl font-black tracking-tight text-white">
-                  {dict.pricing.pro.price}
+                  $29
                   <span className="text-xl font-normal text-zinc-500">
-                    {dict.pricing.pro.period}
+                    /month
                   </span>
                 </div>
                 <p className="text-[10px] font-mono text-cyber-blue uppercase mt-3 tracking-tighter font-bold">
-                  {dict.pricing.pro.subtext}
+                  For growing teams and projects
                 </p>
               </div>
               <ul className="space-y-4 mb-10 flex-grow">
-                {dict.pricing.pro.features.map(
-                  (feature: string, idx: number) => (
-                    <li
-                      key={idx}
-                      className="flex items-center gap-3 text-sm text-zinc-100"
-                    >
-                      <Zap className="w-4 h-4 text-cyber-blue shrink-0" />{' '}
-                      {feature}
-                    </li>
-                  )
-                )}
+                <li className="flex items-center gap-3 text-sm text-zinc-100">
+                  <Zap className="w-4 h-4 text-cyber-blue shrink-0" /> Unlimited
+                  repositories
+                </li>
+                <li className="flex items-center gap-3 text-sm text-zinc-100">
+                  <Zap className="w-4 h-4 text-cyber-blue shrink-0" /> Unlimited
+                  scans
+                </li>
+                <li className="flex items-center gap-3 text-sm text-zinc-100">
+                  <Zap className="w-4 h-4 text-cyber-blue shrink-0" /> $10/month
+                  AI credits
+                </li>
+                <li className="flex items-center gap-3 text-sm text-zinc-100">
+                  <Zap className="w-4 h-4 text-cyber-blue shrink-0" /> Auto-fix
+                  capabilities
+                </li>
+                <li className="flex items-center gap-3 text-sm text-zinc-100">
+                  <Zap className="w-4 h-4 text-cyber-blue shrink-0" /> Priority
+                  support
+                </li>
               </ul>
               <Link
                 href="/signup"
                 className="w-full py-4 rounded-sm bg-cyber-blue hover:bg-cyber-blue/90 transition-all text-black text-xs font-black uppercase text-center tracking-widest shadow-[0_0_25px_rgba(0,224,255,0.2)]"
               >
-                Start Pro Plan
+                Start 14-Day Free Trial
               </Link>
             </div>
 
@@ -490,55 +561,65 @@ export default function ClawMoreClient({ apiUrl, dict }: ClawMoreClientProps) {
             <div className="glass-card p-6 sm:p-8 flex flex-col border-amber-500/20 bg-amber-500/[0.02] hover:border-amber-500/40 transition-all">
               <div className="mb-8">
                 <h4 className="text-amber-400 font-mono text-xs uppercase tracking-widest font-black mb-2">
-                  {dict.pricing.team.name}
+                  Team
                 </h4>
                 <div className="text-4xl sm:text-5xl font-black tracking-tight text-white">
-                  {dict.pricing.team.price}
+                  $99
                   <span className="text-xl font-normal text-zinc-500">
-                    {dict.pricing.team.period}
+                    /month
                   </span>
                 </div>
                 <p className="text-[10px] font-mono text-amber-400/70 uppercase mt-3 tracking-tighter font-bold">
-                  {dict.pricing.team.subtext}
+                  For enterprises and large teams
                 </p>
               </div>
               <ul className="space-y-4 mb-10 flex-grow">
-                {dict.pricing.team.features.map(
-                  (feature: string, idx: number) => (
-                    <li
-                      key={idx}
-                      className="flex items-center gap-3 text-sm text-zinc-100"
-                    >
-                      <ShieldCheck className="w-4 h-4 text-amber-400 shrink-0" />{' '}
-                      {feature}
-                    </li>
-                  )
-                )}
+                <li className="flex items-center gap-3 text-sm text-zinc-100">
+                  <ShieldCheck className="w-4 h-4 text-amber-400 shrink-0" />{' '}
+                  Everything in Pro
+                </li>
+                <li className="flex items-center gap-3 text-sm text-zinc-100">
+                  <ShieldCheck className="w-4 h-4 text-amber-400 shrink-0" />{' '}
+                  SSO integration
+                </li>
+                <li className="flex items-center gap-3 text-sm text-zinc-100">
+                  <ShieldCheck className="w-4 h-4 text-amber-400 shrink-0" />{' '}
+                  Audit logs
+                </li>
+                <li className="flex items-center gap-3 text-sm text-zinc-100">
+                  <ShieldCheck className="w-4 h-4 text-amber-400 shrink-0" />{' '}
+                  Custom integrations
+                </li>
+                <li className="flex items-center gap-3 text-sm text-zinc-100">
+                  <ShieldCheck className="w-4 h-4 text-amber-400 shrink-0" />{' '}
+                  Dedicated support
+                </li>
               </ul>
               <Link
                 href="/signup"
                 className="w-full py-4 rounded-sm bg-amber-500 hover:bg-amber-400 transition-all text-black text-xs font-black uppercase text-center tracking-widest"
               >
-                Start Team Plan
+                Contact Sales
               </Link>
             </div>
           </div>
 
-          <div className="mt-12 sm:mt-20 glass-card p-6 sm:p-10 max-w-2xl mx-auto border-purple-500/20 bg-purple-500/[0.02]">
+          <div className="mt-12 sm:mt-20 glass-card p-6 sm:p-10 max-w-2xl mx-auto border-emerald-500/20 bg-emerald-500/[0.02]">
             <div className="flex items-center gap-3 mb-4">
-              <Activity className="w-5 h-5 text-purple-400" />
-              <h5 className="font-mono text-xs font-black uppercase tracking-[0.4em] text-purple-400">
-                {dict.pricing.tax.title}
+              <ShieldCheck className="w-5 h-5 text-emerald-400" />
+              <h5 className="font-mono text-xs font-black uppercase tracking-[0.4em] text-emerald-400">
+                30-Day Money-Back Guarantee
               </h5>
             </div>
             <p className="text-sm text-zinc-400 font-mono leading-relaxed tracking-tight">
-              {dict.pricing.tax.desc}
+              Try ClawMore risk-free. If you're not satisfied within 30 days,
+              we'll refund your payment in full. No questions asked.
             </p>
           </div>
         </div>
       </section>
 
-      <FAQ items={FAQ_ITEMS} title={dict.faq.title} />
+      <FAQ items={FAQ_ITEMS} title="Frequently Asked Questions" />
 
       {/* Footer */}
       <footer className="py-14 sm:py-20 border-t border-white/5 bg-black/40">

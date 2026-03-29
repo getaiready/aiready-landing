@@ -36,7 +36,10 @@ describe('create-managed-account handler', () => {
     };
 
     // Mock successful vending flow
-    vi.mocked(vending.createManagedAccount).mockResolvedValue('req_123');
+    vi.mocked(vending.createManagedAccount).mockResolvedValue({
+      requestId: 'req_123',
+      estimatedTimeSeconds: 180,
+    });
     vi.mocked(vending.waitForAccountCreation).mockResolvedValue('123456789012');
     vi.mocked(governance.createServerlessSCP).mockResolvedValue('scp_999');
     vi.mocked(vending.bootstrapManagedAccount).mockResolvedValue(

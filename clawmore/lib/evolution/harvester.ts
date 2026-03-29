@@ -98,7 +98,9 @@ export class Harvester {
   ): Promise<InnovationPattern[]> {
     const apiKey = process.env.MINIMAX_API_KEY;
     if (!apiKey) {
-      console.warn('[Harvester] No MINIMAX_API_KEY set, skipping AI extraction');
+      console.warn(
+        '[Harvester] No MINIMAX_API_KEY set, skipping AI extraction'
+      );
       return [];
     }
 

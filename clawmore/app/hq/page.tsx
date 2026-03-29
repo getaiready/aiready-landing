@@ -1,10 +1,7 @@
 import React from 'react';
 import HqClient from './HqClient';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import {
-  DynamoDBDocumentClient,
-  ScanCommand,
-} from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocumentClient, ScanCommand } from '@aws-sdk/lib-dynamodb';
 
 export const metadata = {
   title: 'ClawHQ | Platform Orchestrator',

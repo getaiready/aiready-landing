@@ -41,7 +41,7 @@ export async function createManagedAccount(
   userName: string,
   userId?: string,
   isWarmPool: boolean = false
-): Promise<string> {
+): Promise<{ requestId: string; estimatedTimeSeconds: number }> {
   const sanitizedEmail = isWarmPool
     ? userEmail.replace('@', `+clawpool-${Date.now().toString(36)}@`)
     : userEmail.replace('@', '+clawmore@');
@@ -55,6 +55,7 @@ export async function createManagedAccount(
     { Key: 'Project', Value: 'ClawMore' },
     { Key: 'Type', Value: 'ManagedNode' },
     { Key: 'Status', Value: isWarmPool ? 'Available' : 'Active' },
+    { Key: 'CreatedAt', Value: new Date().toISOString() },
   ];
 
   if (!isWarmPool) {
@@ -75,7 +76,13 @@ export async function createManagedAccount(
     throw new Error('Failed to initiate account creation');
   }
 
-  return response.CreateAccountStatus.Id;
+  // AWS account creation typically takes 2-5 minutes
+  const estimatedTimeSeconds = isWarmPool ? 30 : 180; // Warm pool accounts are faster
+
+  return {
+    requestId: response.CreateAccountStatus.Id,
+    estimatedTimeSeconds,
+  };
 }
 
 /**
@@ -88,7 +95,8 @@ export async function createManagedAccount(
  */
 export async function waitForAccountCreation(
   requestId: string,
-  maxRetries = 20
+  maxRetries = 20,
+  onProgress?: (progress: { attempt: number; status: string }) => void
 ): Promise<string> {
   for (let i = 0; i < maxRetries; i++) {
     const command = new DescribeCreateAccountStatusCommand({
@@ -97,6 +105,13 @@ export async function waitForAccountCreation(
 
     const response = await orgClient.send(command);
     const status = response.CreateAccountStatus?.State;
+
+    if (onProgress) {
+      onProgress({
+        attempt: i + 1,
+        status: status || 'UNKNOWN',
+      });
+    }
 
     if (status === 'SUCCEEDED' && response.CreateAccountStatus?.AccountId) {
       return response.CreateAccountStatus.AccountId;

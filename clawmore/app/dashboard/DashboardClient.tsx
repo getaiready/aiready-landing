@@ -249,7 +249,7 @@ export default function DashboardClient({
             Dashboard <span className="text-cyber-blue">Core</span>
           </h1>
           <p className="text-zinc-500 font-mono text-[10px] uppercase tracking-[0.4em]">
-            System Status • {activeTab.toUpperCase()}
+            Welcome back, {user.name || 'Developer'} • {activeTab.toUpperCase()}
           </p>
         </div>
 
@@ -298,14 +298,14 @@ export default function DashboardClient({
                     <Layers className="w-24 h-24" />
                   </div>
                   <h3 className="text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-500 mb-6">
-                    AWS Compute Usage
+                    AWS Usage This Month
                   </h3>
                   <div className="flex items-end gap-3 mb-8">
                     <span className="text-4xl font-black text-white italic">
                       ${(status.awsSpendCents / 100).toFixed(2)}
                     </span>
                     <span className="text-zinc-500 text-sm mb-1 font-mono uppercase tracking-tighter">
-                      / ${(status.awsInclusionCents / 100).toFixed(2)} Platform
+                      of ${(status.awsInclusionCents / 100).toFixed(2)} included
                     </span>
                   </div>
                   <div className="space-y-4">
@@ -319,7 +319,7 @@ export default function DashboardClient({
                     </div>
                     <div className="flex justify-between text-[10px] font-mono">
                       <span className="text-zinc-400 uppercase tracking-tighter">
-                        Resource Utilization
+                        Budget Used
                       </span>
                       <span className="text-cyber-blue font-bold">
                         {(
@@ -332,20 +332,20 @@ export default function DashboardClient({
                   </div>
                 </div>
 
-                {/* AI Fuel Tank Card */}
+                {/* AI Credits Card */}
                 <div className="bg-black/40 border border-white/5 rounded-2xl p-8 relative overflow-hidden group">
                   <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
                     <Zap className="w-24 h-24 text-amber-500" />
                   </div>
                   <h3 className="text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-500 mb-6">
-                    AI Fuel Tank
+                    AI Auto-Fix Credits
                   </h3>
                   <div className="flex items-end gap-3 mb-8">
                     <span className="text-4xl font-black text-amber-500 italic">
                       ${(status.aiTokenBalanceCents / 100).toFixed(2)}
                     </span>
                     <span className="text-zinc-500 text-sm mb-1 font-mono uppercase tracking-tighter">
-                      Credits Remaining
+                      remaining
                     </span>
                   </div>
                   <div className="space-y-4">
@@ -359,13 +359,13 @@ export default function DashboardClient({
                     </div>
                     <div className="flex justify-between text-[10px] font-mono">
                       <span className="text-zinc-400 uppercase tracking-tighter">
-                        Evolution Fuel Level
+                        Credit Balance
                       </span>
                       <span className="text-amber-500 font-bold">
                         {status.aiTokenBalanceCents <=
                         status.aiRefillThresholdCents
-                          ? 'CRITICAL LOW'
-                          : 'OPTIMAL'}
+                          ? 'LOW - Consider topping up'
+                          : 'Good'}
                       </span>
                     </div>
                   </div>
@@ -580,22 +580,22 @@ export default function DashboardClient({
             <div className="space-y-12">
               <div>
                 <h3 className="text-sm font-black text-amber-500 mb-3 flex items-center gap-2 uppercase tracking-tight">
-                  <Zap className="w-4 h-4" /> Credit Sharing & Savings
+                  <Zap className="w-4 h-4" /> Save on AI Credits
                 </h3>
                 <p className="text-xs text-zinc-500 mb-8 leading-relaxed font-mono italic max-w-2xl">
-                  Share anonymous code patterns with our community to earn
-                  credit discounts. Your code stays private — we only learn from
-                  the structure, never the content.
+                  Share anonymous code patterns to earn discounts on AI credits.
+                  We only learn from code structure, never your actual code or
+                  sensitive data.
                 </p>
 
                 <div className="bg-black/60 p-8 rounded-3xl border border-white/5 space-y-8 shadow-2xl">
                   <div className="flex items-center justify-between gap-6">
                     <div>
                       <p className="text-sm font-black italic text-white uppercase tracking-tight">
-                        Share Patterns for Discounts
+                        Enable Pattern Sharing
                       </p>
                       <p className="text-[10px] text-zinc-600 uppercase tracking-widest mt-1">
-                        Anonymous code structure shared to improve the platform
+                        Get discounts by sharing anonymous code patterns
                       </p>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer scale-110">
@@ -614,14 +614,14 @@ export default function DashboardClient({
                   <div className="pt-8 border-t border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
                       <p className="text-[9px] font-mono uppercase tracking-[0.3em] text-zinc-600 mb-2">
-                        Evolution Status
+                        Current Status
                       </p>
                       <p
                         className={`text-xs font-black italic ${isCoevolutionEnabled ? 'text-emerald-500 uppercase' : 'text-amber-500 uppercase'}`}
                       >
                         {isCoevolutionEnabled
-                          ? 'WAVE_SYNC_ACTIVE • Mutation Tax waived'
-                          : 'PRIVATE_FORK_ACTIVE • $1.00 Mutation Tax applied'}
+                          ? 'Pattern sharing enabled • You get credit discounts'
+                          : 'Pattern sharing disabled • Standard pricing applies'}
                       </p>
                     </div>
                     <div
@@ -632,8 +632,8 @@ export default function DashboardClient({
                       }`}
                     >
                       {isCoevolutionEnabled
-                        ? 'Syncing Active'
-                        : 'Isolated Mode'}
+                        ? 'Discounts Active'
+                        : 'No Discounts'}
                     </div>
                   </div>
                 </div>
@@ -643,13 +643,13 @@ export default function DashboardClient({
         ) : activeTab === 'account' ? (
           <div className="bg-zinc-900/50 border border-white/5 rounded-3xl p-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
             <h2 className="text-2xl font-black italic mb-12 tracking-tight uppercase">
-              Billing & <span className="text-cyber-blue">Identity</span>
+              Billing & <span className="text-cyber-blue">Account</span>
             </h2>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-12">
               <div className="space-y-6">
                 <h3 className="text-[10px] font-mono uppercase tracking-[0.4em] text-zinc-600">
-                  Identity Profile
+                  Your Profile
                 </h3>
                 <div className="bg-black/60 border border-white/5 p-8 rounded-3xl shadow-xl">
                   <div className="flex items-center gap-6 mb-8">
@@ -658,7 +658,7 @@ export default function DashboardClient({
                     </div>
                     <div className="space-y-1">
                       <p className="text-xl font-black italic text-white uppercase tracking-tight">
-                        {user.name || 'Synthesis Engine dev'}
+                        {user.name || 'Developer'}
                       </p>
                       <p className="text-[10px] text-zinc-600 font-mono uppercase tracking-widest">
                         {user.email}
@@ -668,7 +668,7 @@ export default function DashboardClient({
                   <div className="space-y-4 pt-6 border-t border-white/5">
                     <div className="flex justify-between items-center bg-white/[0.02] p-3 rounded-xl border border-white/5">
                       <span className="text-[9px] text-zinc-600 uppercase font-black tracking-widest">
-                        Protocol Status
+                        Plan Status
                       </span>
                       <span
                         className={`font-black italic text-[10px] uppercase tracking-widest ${
@@ -678,8 +678,8 @@ export default function DashboardClient({
                         }`}
                       >
                         {status.planStatus === 'MANAGED'
-                          ? 'MANAGED'
-                          : 'FREE_TIER'}
+                          ? 'Pro Plan Active'
+                          : 'Free Tier'}
                       </span>
                     </div>
                     <div className="flex justify-between items-center bg-white/[0.02] p-3 rounded-xl border border-white/5">
@@ -687,7 +687,7 @@ export default function DashboardClient({
                         Access Level
                       </span>
                       <span className="text-white font-black italic text-[10px] uppercase tracking-widest">
-                        Managed Beta
+                        Full Access
                       </span>
                     </div>
                   </div>

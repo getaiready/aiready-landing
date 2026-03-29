@@ -73,7 +73,7 @@ export class ProvisioningOrchestrator {
         );
       } else {
         console.log(`[Provision] Pool empty. Creating new account...`);
-        const requestId = await createManagedAccount(
+        const { requestId } = await createManagedAccount(
           userEmail,
           userName,
           _userId
@@ -317,7 +317,7 @@ export class ProvisioningOrchestrator {
     const adminEmail = process.env.ADMIN_EMAIL || 'caodanju@gmail.com';
     console.log('[Provision] Replenishing warm pool...');
     try {
-      const requestId = await createManagedAccount(
+      const { requestId } = await createManagedAccount(
         adminEmail,
         'WarmPool',
         undefined,

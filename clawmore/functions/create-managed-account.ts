@@ -17,7 +17,7 @@ export const handler = async (event: any) => {
 
   try {
     console.log(`Initiating account creation for ${userEmail}...`);
-    const requestId = await createManagedAccount(userEmail, userName);
+    const { requestId } = await createManagedAccount(userEmail, userName);
 
     console.log(`Waiting for account creation (RequestID: ${requestId})...`);
     const accountId = await waitForAccountCreation(requestId);

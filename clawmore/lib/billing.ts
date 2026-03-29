@@ -33,11 +33,43 @@ export interface PlatformSubscriptionOpts {
 
 const TIER_CONFIG: Record<
   string,
-  { priceKey: string; amount: number; name: string }
+  { priceKey: string; amount: number; name: string; features: string[] }
 > = {
-  starter: { priceKey: 'PlatformPrice', amount: 2900, name: 'Starter' },
-  pro: { priceKey: 'ProPrice', amount: 9900, name: 'Pro' },
-  team: { priceKey: 'TeamPrice', amount: 29900, name: 'Team' },
+  starter: {
+    priceKey: 'PlatformPrice',
+    amount: 2900,
+    name: 'Starter',
+    features: [
+      '5 repositories',
+      '100 scans/month',
+      'Basic reporting',
+      'Community support',
+    ],
+  },
+  pro: {
+    priceKey: 'ProPrice',
+    amount: 9900,
+    name: 'Pro',
+    features: [
+      'Unlimited repositories',
+      'Unlimited scans',
+      '$10/month AI credits',
+      'Auto-fix capabilities',
+      'Priority support',
+    ],
+  },
+  team: {
+    priceKey: 'TeamPrice',
+    amount: 29900,
+    name: 'Team',
+    features: [
+      'Everything in Pro',
+      'SSO integration',
+      'Audit logs',
+      'Custom integrations',
+      'Dedicated support',
+    ],
+  },
 };
 
 export async function createPlatformSubscriptionSession(
@@ -57,7 +89,6 @@ export async function createPlatformSubscriptionSession(
 
   const tierConfig = TIER_CONFIG[tier] || TIER_CONFIG.pro;
   const priceId = (Resource as any)[tierConfig.priceKey]?.id;
-  const mutationTaxPriceId = (Resource as any).MutationTaxPrice?.id;
 
   // Auto-generate repo name if not provided, using a unique suffix
   const shortId = userId.substring(0, 8).toLowerCase();
@@ -83,10 +114,8 @@ export async function createPlatformSubscriptionSession(
     });
   }
 
-  // Always attach the metered tax price if it exists
-  if (mutationTaxPriceId) {
-    lineItems.push({ price: mutationTaxPriceId });
-  }
+  // Simplified: No more mutation tax - it's included in the base price
+  // The coEvolutionOptIn is now just for tracking, not for billing
 
   return await getStripe().checkout.sessions.create({
     customer: customerId,

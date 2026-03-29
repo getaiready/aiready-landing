@@ -36,7 +36,7 @@ async function warmPool(targetSize: number = 3) {
     console.log(`[WarmPool] Provisioning account ${i + 1}/${targetSize}...`);
 
     try {
-      const requestId = await createManagedAccount(
+      const { requestId } = await createManagedAccount(
         adminEmail,
         'WarmPool',
         undefined,

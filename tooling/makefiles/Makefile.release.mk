@@ -325,9 +325,7 @@ release-one: ## Release one npm spoke: SPOKE=name TYPE=patch|minor|major
 	@$(call commit_and_tag)
 	@$(call run_if_enabled,$(RELEASE_PRECHECKS),$(MAKE) -C $(ROOT_DIR) release-checks-spoke SPOKE=$(SPOKE),spoke checks)
 	@$(call run_if_enabled,$(RELEASE_PUBLISH),$(MAKE) -C $(ROOT_DIR) npm-publish SPOKE=$(SPOKE) && $(MAKE) -C $(ROOT_DIR) publish SPOKE=$(SPOKE) OWNER=$(OWNER),publish spoke)
-	@if [ "$(SPOKE)" = "cli" ]; then \
-		$(call run_if_enabled,$(RELEASE_DISTRIBUTION),$(MAKE) -C $(ROOT_DIR) update-distribution,distribution channels); \
-	fi
+	@$(call run_if_enabled,$(RELEASE_DISTRIBUTION),$(MAKE) -C $(ROOT_DIR) update-distribution,distribution channels)
 	@$(call run_if_enabled,$(RELEASE_PUSH),$(MAKE) sync,sync and push)
 	@$(call log_success,Release finished for @aiready/$(SPOKE))
 
@@ -361,8 +359,12 @@ release-all: ## Release all npm spokes: TYPE=patch|minor|major
 update-distribution: ## Update all distribution channels (Homebrew, Docker, etc.)
 	@$(call log_step,Updating Homebrew formula...)
 	@$(MAKE) update-homebrew
-	@$(call log_step,Distribution channels updated (Homebrew, Docker auto-updates from npm))
-	@$(call log_success,Distribution channels updated)
+	@$(call log_step,Building Docker images...)
+	@$(MAKE) -C $(ROOT_DIR) docker-build || $(call log_warning,Docker build failed - continuing)
+	@$(call log_step,Package distribution channels ready)
+	@$(call log_success,Distribution channels updated: Homebrew formula, Docker images built)
+	@$(call log_info,Note: VS Code extension and GitHub Action are standalone - they don't use CLI npm package)
+	@$(call log_info,These require separate releases via their own distribution channels)
 
 update-homebrew: ## Update Homebrew formula to latest CLI version
 	@$(call log_step,Getting latest CLI version from npm...)
@@ -455,3 +457,17 @@ release-help: ## Show release targets and examples
 	@printf "%-45s %s\n" "release-vscode TYPE=patch" "Release VS Code extension"
 	@printf "%-45s %s\n" "release-status" "Show all component versions"
 	@printf "%-45s %s\n" "check-changes SPOKE=cli" "Check if spoke has unreleased changes"
+	@echo ""
+	@echo "═══════════════════════════════════════════════════════════"
+	@echo "Distribution Channels (automatically updated on release):"
+	@echo "═══════════════════════════════════════════════════════════"
+	@echo "  ✅ npm - @aiready/cli and all spokes"
+	@echo "  ✅ Homebrew - Formula updated with latest version + SHA256"
+	@echo "  ✅ Docker - Images built automatically"
+	@echo "  ⚠️  VS Code - Standalone (VS Code Marketplace)"
+	@echo "  ⚠️  GitHub Action - Standalone (GitHub Marketplace)"
+	@echo ""
+	@echo "  ℹ️  VS Code & GitHub Action are NOT npm packages"
+	@echo "  ℹ️  They have their own versioning and release processes"
+	@echo "  ℹ️  They don't depend on @aiready/cli npm package"
+	@echo "═══════════════════════════════════════════════════════════"

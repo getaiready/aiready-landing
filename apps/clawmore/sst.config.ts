@@ -37,16 +37,16 @@ export default $config({
     const domainName = isProd ? 'clawmore.ai' : `${$app.stage}.clawmore.ai`;
 
     // --- Secrets (Security Hardening) ---
-    const StripeSecretKey = new sst.aws.Secret('StripeSecretKey');
-    const GithubServiceToken = new sst.aws.Secret('GithubServiceToken');
-    const OpenRouterApiKey = new sst.aws.Secret('OpenRouterApiKey');
-    const GithubClientSecret = new sst.aws.Secret('GithubClientSecret');
-    const GoogleClientSecret = new sst.aws.Secret('GoogleClientSecret');
-    const AdminPassword = new sst.aws.Secret('AdminPassword');
-    const SpokeTelegramBotToken = new sst.aws.Secret('SpokeTelegramBotToken');
-    const SpokeMiniMaxApiKey = new sst.aws.Secret('SpokeMiniMaxApiKey');
-    const SpokeOpenAIApiKey = new sst.aws.Secret('SpokeOpenAIApiKey');
-    const SpokeGithubToken = new sst.aws.Secret('SpokeGithubToken');
+    const StripeSecretKey = new sst.Secret('StripeSecretKey');
+    const GithubServiceToken = new sst.Secret('GithubServiceToken');
+    const OpenRouterApiKey = new sst.Secret('OpenRouterApiKey');
+    const GithubClientSecret = new sst.Secret('GithubClientSecret');
+    const GoogleClientSecret = new sst.Secret('GoogleClientSecret');
+    const AdminPassword = new sst.Secret('AdminPassword');
+    const SpokeTelegramBotToken = new sst.Secret('SpokeTelegramBotToken');
+    const SpokeMiniMaxApiKey = new sst.Secret('SpokeMiniMaxApiKey');
+    const SpokeOpenAIApiKey = new sst.Secret('SpokeOpenAIApiKey');
+    const SpokeGithubToken = new sst.Secret('SpokeGithubToken');
 
     // --- Stripe Products & Prices (IaC) ---
 

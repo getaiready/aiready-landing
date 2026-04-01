@@ -188,7 +188,7 @@ Let's see how AIReady helped improve a real project:
 
 ## Next Steps
 
-1. **Join the community:** [Discord](https://discord.gg/aiready)
+1. **Join the community:** [Discord](https://discord.gg/GdEghUdWHS)
 2. **Track trends:** [Platform](https://platform.getaiready.dev)
 3. **Read more:** [AI Engineering Handbook](./docs/AI_ENGINEERING_HANDBOOK.md)
 4. **Contribute:** [GitHub](https://github.com/getaiready/aiready-cli)
@@ -219,6 +219,6 @@ npx @aiready/cli scan .
 
 ---
 
-**Found this helpful?** Share it with your team and join our [Discord community](https://discord.gg/aiready) to discuss AI readiness strategies.
+**Found this helpful?** Share it with your team and join our [Discord community](https://discord.gg/GdEghUdWHS) to discuss AI readiness strategies.
 
 **Want to track improvements over time?** Check out [AIReady Platform](https://platform.getaiready.dev) for trend tracking, team collaboration, and CI/CD integration.

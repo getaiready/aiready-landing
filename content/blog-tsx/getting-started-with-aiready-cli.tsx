@@ -282,7 +282,7 @@ aiready scan . --upload --api-key ar_your_key
     <ol>
       <li>
         <strong>Join the community:</strong>{' '}
-        <a href="https://discord.gg/aiready">Discord</a>
+        <a href="https://discord.gg/GdEghUdWHS">Discord</a>
       </li>
       <li>
         <strong>Track trends:</strong>{' '}
@@ -345,8 +345,8 @@ npx @aiready/cli scan .
 
     <p>
       <strong>Found this helpful?</strong> Share it with your team and join our{' '}
-      <a href="https://discord.gg/aiready">Discord community</a> to discuss AI
-      readiness strategies.
+      <a href="https://discord.gg/GdEghUdWHS">Discord community</a> to discuss
+      AI readiness strategies.
     </p>
     <p>
       <strong>Want to track improvements over time?</strong> Check out{' '}

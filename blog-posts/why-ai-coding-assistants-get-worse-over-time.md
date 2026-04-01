@@ -116,7 +116,7 @@ aiready scan . --score
 We're building this in the open:
 
 - **GitHub:** [github.com/getaiready/aiready-cli](https://github.com/getaiready/aiready-cli)
-- **Discord:** [discord.gg/aiready](https://discord.gg/aiready)
+- **Discord:** [discord.gg/GdEghUdWHS](https://discord.gg/GdEghUdWHS)
 - **Website:** [getaiready.dev](https://getaiready.dev)
 
 ## The Bigger Picture

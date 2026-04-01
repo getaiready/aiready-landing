@@ -216,7 +216,7 @@ aiready scan . --score
       </li>
       <li>
         <strong>Discord:</strong>{' '}
-        <a href="https://discord.gg/aiready">discord.gg/aiready</a>
+        <a href="https://discord.gg/GdEghUdWHS">discord.gg/GdEghUdWHS</a>
       </li>
       <li>
         <strong>Website:</strong>{' '}

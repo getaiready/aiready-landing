@@ -12,7 +12,9 @@ export async function register() {
         const errorMessage = event.exception?.values?.[0]?.value || '';
         if (
           errorMessage.includes('NEXT_NOT_FOUND') ||
-          errorMessage.includes('NEXT_REDIRECT')
+          errorMessage.includes('NEXT_REDIRECT') ||
+          // Filter transient ENOENT errors from Next.js file watcher
+          (errorMessage.includes('ENOENT') && errorMessage.includes('scandir'))
         ) {
           return null;
         }
@@ -31,7 +33,9 @@ export async function register() {
         const errorMessage = event.exception?.values?.[0]?.value || '';
         if (
           errorMessage.includes('NEXT_NOT_FOUND') ||
-          errorMessage.includes('NEXT_REDIRECT')
+          errorMessage.includes('NEXT_REDIRECT') ||
+          // Filter transient ENOENT errors from Next.js file watcher
+          (errorMessage.includes('ENOENT') && errorMessage.includes('scandir'))
         ) {
           return null;
         }

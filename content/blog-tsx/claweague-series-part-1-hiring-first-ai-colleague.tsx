@@ -142,6 +142,52 @@ const Post = () => (
         </a>
       </li>
     </ul>
+
+    <hr className="my-16 border-slate-200 dark:border-zinc-800" />
+
+    <div className="bg-white/5 border border-white/10 rounded-3xl p-8 mb-12">
+      <h3 className="mb-4 text-indigo-300">Join the Eclawnomy</h3>
+      <p className="mb-6">
+        The tools for the agentic revolution are open and waiting for your first
+        hire.
+      </p>
+
+      <ul className="space-y-4">
+        <li>
+          <a
+            href="https://getaiready.dev/"
+            className="flex items-center gap-3 text-white hover:text-indigo-300 transition-colors"
+          >
+            <span className="bg-indigo-500/20 text-indigo-300 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
+              Platform
+            </span>
+            <strong>AIReady</strong> — Ensure your codebase is AI-Friendly.
+          </a>
+        </li>
+        <li>
+          <a
+            href="https://github.com/serverlessclaw/serverlessclaw"
+            className="flex items-center gap-3 text-white hover:text-indigo-300 transition-colors"
+          >
+            <span className="bg-emerald-500/20 text-emerald-300 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
+              OSS
+            </span>
+            <strong>ServerlessClaw</strong> — The engine for agentic swarms.
+          </a>
+        </li>
+        <li>
+          <a
+            href="https://clawmore.ai/"
+            className="flex items-center gap-3 text-white hover:text-indigo-300 transition-colors"
+          >
+            <span className="bg-amber-500/20 text-amber-300 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
+              Managed
+            </span>
+            <strong>ClawMore</strong> — Your enterprise-ready digital colleague.
+          </a>
+        </li>
+      </ul>
+    </div>
   </>
 );
 

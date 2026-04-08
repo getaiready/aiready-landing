@@ -33,7 +33,7 @@ This document outlines the content strategy for the **ClawMore** platform blog, 
 - **Hook**: Collective intelligence is the ultimate moat.
 - **Key Points**:
   - Explaining the **Co-evolution Protocol**.
-  - **The Mutation Tax Waiver**: Trade anonymous innovation patterns for lower fees.
+  - **The Co-evolution Dividend**: Trade anonymous innovation patterns for lower platform fees.
   - Growing together: When one 'Recruitment Claw' gets smarter, they all do (while keeping your private data private).
 
 ---

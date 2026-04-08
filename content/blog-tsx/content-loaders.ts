@@ -51,6 +51,8 @@ export const contentLoaders: Record<string, () => Promise<{ default: any }>> = {
     import('./why-ai-coding-assistants-get-worse'),
   'multi-human-multi-agent-collaboration': () =>
     import('./multi-human-multi-agent-collaboration'),
+  'deepseek-v4-expert-mode-readiness': () =>
+    import('./deepseek-v4-expert-mode'),
   'claweague-series-part-1-hiring-first-ai-colleague': () =>
     import('./claweague-series-part-1-hiring-first-ai-colleague'),
   'claweague-series-part-2-roi-autonomous-evolution': () =>

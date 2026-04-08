@@ -26,8 +26,10 @@ import readinessScorecardMeta from './readiness-scorecard.meta';
 import gettingStartedWithAireadyCliMeta from './getting-started-with-aiready-cli.meta';
 import whyAiCodingAssistantsGetWorseMeta from './why-ai-coding-assistants-get-worse.meta';
 import multiHumanMultiAgentCollaborationMeta from './multi-human-multi-agent-collaboration.meta';
+import deepseekV4ExpertModeMeta from './deepseek-v4-expert-mode.meta';
 
 export const technicalMeta = [
+  deepseekV4ExpertModeMeta,
   theNeuralSpineMeta,
   closingTheLoopMeta,
   cognitiveTieringMeta,

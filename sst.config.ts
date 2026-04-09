@@ -14,7 +14,7 @@ if (
 export default $config({
   app(input) {
     return {
-      name: 'aiready-landing',
+      name: 'aiready-landing-' + (input?.stage || 'dev'),
       removal: input?.stage === 'production' ? 'retain' : 'remove',
       home: 'aws',
     };
@@ -76,20 +76,17 @@ export default $config({
       environment: {
         NEXT_PUBLIC_REQUEST_URL: api.url,
       },
-      domain: {
-        name:
-          $app.stage === 'production'
-            ? 'getaiready.dev'
-            : `${$app.stage}.getaiready.dev`,
-        redirects:
-          $app.stage === 'production'
-            ? ['www.getaiready.dev']
-            : [`www.${$app.stage}.getaiready.dev`],
-        dns: sst.cloudflare.dns({
-          zone: cloudflareZoneId,
-          proxy: true,
-        }),
-      },
+      domain:
+        $app.stage === 'production'
+          ? {
+              name: 'getaiready.dev',
+              redirects: ['www.getaiready.dev'],
+              dns: sst.cloudflare.dns({
+                zone: cloudflareZoneId,
+                proxy: true,
+              }),
+            }
+          : undefined,
       invalidation: {
         paths: ['/*'],
         wait: true,

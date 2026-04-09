@@ -29,7 +29,7 @@ export default $config({
     const manageSesDomainIdentity =
       isProduction && process.env.SES_MANAGE_DOMAIN_IDENTITY === 'true';
 
-    let emailDomain = domainName;
+    const emailDomain = domainName;
 
     // API Gateway HTTP API for public form submissions
     const api = new sst.aws.ApiGatewayV2('RequestApi', {

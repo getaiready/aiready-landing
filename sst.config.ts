@@ -4,8 +4,11 @@
 export default $config({
   app(input) {
     const stage = input?.stage || 'dev';
+    // Use fixed app name for production (uses existing resources), dynamic for dev (avoids lock)
+    const name =
+      stage === 'production' ? 'aiready-landing' : 'aiready-landing-' + stage;
     return {
-      name: 'aiready-landing-' + stage,
+      name,
       removal: stage === 'production' ? 'retain' : 'remove',
       home: 'aws',
     };

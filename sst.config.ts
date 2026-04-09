@@ -13,9 +13,13 @@ if (
 
 export default $config({
   app(input) {
+    const stage = input?.stage || 'dev';
     return {
-      name: 'aiready-landing',
-      removal: input?.stage === 'production' ? 'retain' : 'remove',
+      name:
+        stage === 'production'
+          ? 'aiready-landing-prod'
+          : 'aiready-landing-' + stage,
+      removal: stage === 'production' ? 'retain' : 'remove',
       home: 'aws',
     };
   },

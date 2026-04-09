@@ -55,20 +55,9 @@ export default $config({
       ],
     });
 
-    // Static site deployment - domain only for prod to prevent DNS conflicts
-    const useCustomDomain = $app.stage === 'production';
-    const domainConfig = useCustomDomain
-      ? {
-          domain: {
-            name: 'getaiready.dev',
-            redirects: ['www.getaiready.dev'],
-            dns: sst.cloudflare.dns({
-              zone: cloudflareZoneId,
-              proxy: true,
-            }),
-          },
-        }
-      : {};
+    // Static site deployment - skip custom domain for production (old app handles it)
+    // For dev, no domain; for production, skip to use existing CloudFront
+    const useCustomDomain = false; // Disable to avoid DNS conflicts with existing prod
 
     const site = new sst.aws.StaticSite('AireadyLanding', {
       path: './',
@@ -79,7 +68,16 @@ export default $config({
       environment: {
         NEXT_PUBLIC_REQUEST_URL: api.url,
       },
-      ...domainConfig,
+      ...(useCustomDomain && {
+        domain: {
+          name: 'getaiready.dev',
+          redirects: ['www.getaiready.dev'],
+          dns: sst.cloudflare.dns({
+            zone: cloudflareZoneId,
+            proxy: true,
+          }),
+        },
+      }),
       invalidation: {
         paths: ['/*'],
         wait: true,

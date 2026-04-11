@@ -11,6 +11,9 @@ export default $config({
       home: 'aws',
     };
   },
+  providers: {
+    aws: '6.60.0',
+  },
   async run() {
     const cloudflareZoneId = '50eb7dcadc84c58ab34583742db0b671';
 

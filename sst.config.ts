@@ -14,6 +14,11 @@ export default $config({
           version: '7.20.0',
         },
       },
+      defaults: {
+        function: {
+          runtime: 'nodejs24.x',
+        },
+      },
     };
   },
   async run() {

@@ -36,14 +36,16 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
       description: post.excerpt,
       url: canonicalUrl,
       siteName: 'AIReady',
-      images: [
-        {
-          url: fullImageUrl,
-          width: 1200,
-          height: 630,
-          alt: post.title,
-        },
-      ],
+      images: fullImageUrl
+        ? [
+            {
+              url: fullImageUrl,
+              width: 1200,
+              height: 630,
+              alt: post.title,
+            },
+          ]
+        : [],
       locale: 'en_US',
       type: 'article',
       publishedTime: post.date,

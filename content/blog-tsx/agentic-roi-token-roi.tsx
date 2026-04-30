@@ -13,8 +13,12 @@ const Post = () => (
       </strong>
     </blockquote>
 
-    <div className="my-8 max-w-4xl mx-auto italic text-zinc-400 border border-zinc-800 p-12 text-center rounded-3xl">
-      [ ASSET_PENDING: AGENTIC_ROI_2_COVER ]
+    <div className="my-8 max-w-4xl mx-auto">
+      <img
+        src="/agentic-roi-2.png"
+        alt="Token ROI - cover"
+        className="w-full rounded-3xl shadow-2xl border border-slate-200 dark:border-zinc-800"
+      />
     </div>
 
     <p>

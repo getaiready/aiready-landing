@@ -24,6 +24,10 @@ export default $config({
   async run() {
     const cloudflareZoneId = '50eb7dcadc84c58ab34583742db0b671';
 
+    const isProduction = $app.stage === 'production';
+    const isDev = $app.stage === 'dev';
+    const domainName = isProduction ? 'getaiready.dev' : 'dev.getaiready.dev';
+
     // Storage for report submissions
     const submissions = new sst.aws.Bucket('SubmissionsV3', {
       public: false,
@@ -31,12 +35,10 @@ export default $config({
     });
 
     // SES domain identity - managed only for production to avoid conflicts
-    const domainName = 'getaiready.dev';
     const defaultSesFromEmail = `notifications@${domainName}`;
 
     // For production, don't try to create SES identity - it already exists
     // For dev, optionally create if requested
-    const isProduction = $app.stage === 'production';
     const manageSesDomainIdentity =
       isProduction && process.env.SES_MANAGE_DOMAIN_IDENTITY === 'true';
 
@@ -65,8 +67,8 @@ export default $config({
       ],
     });
 
-    // Static site deployment - only use custom domain for production
-    const useCustomDomain = $app.stage === 'production';
+    // Static site deployment - use custom domain for production and dev
+    const useCustomDomain = isProduction || isDev;
 
     const site = new sst.aws.StaticSite('AireadyLanding', {
       path: './',
@@ -79,8 +81,8 @@ export default $config({
       },
       ...(useCustomDomain && {
         domain: {
-          name: 'getaiready.dev',
-          redirects: ['www.getaiready.dev'],
+          name: domainName,
+          redirects: isProduction ? ['www.getaiready.dev'] : undefined,
           dns: sst.cloudflare.dns({
             zone: cloudflareZoneId,
             proxy: true,

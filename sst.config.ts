@@ -65,9 +65,8 @@ export default $config({
       ],
     });
 
-    // Static site deployment - skip custom domain for production (old app handles it)
-    // For dev, no domain; for production, skip to use existing CloudFront
-    const useCustomDomain = false; // Disable to avoid DNS conflicts with existing prod
+    // Static site deployment - only use custom domain for production
+    const useCustomDomain = $app.stage === 'production';
 
     const site = new sst.aws.StaticSite('AireadyLanding', {
       path: './',

@@ -107,6 +107,12 @@ export const generateProductSchema = () => {
     '@type': 'Product',
     name: 'AIReady CLI',
     description: siteConfig.description,
+    image: {
+      '@type': 'ImageObject',
+      url: 'https://getaiready.dev/logo-text.png',
+      width: 2046,
+      height: 800,
+    },
     brand: {
       '@type': 'Brand',
       name: 'AIReady',
@@ -117,6 +123,19 @@ export const generateProductSchema = () => {
       priceCurrency: 'USD',
       availability: 'https://schema.org/InStock',
       url: siteConfig.links.npm,
+      shippingDetails: {
+        '@type': 'OfferShippingDetails',
+        shippingRate: {
+          '@type': 'MonetaryAmount',
+          value: '0',
+          currency: 'USD',
+        },
+      },
+      hasMerchantReturnPolicy: {
+        '@type': 'MerchantReturnPolicy',
+        applicableCountry: 'US',
+        returnPolicyCategory: 'https://schema.org/NoReturns',
+      },
     },
     aggregateRating: {
       '@type': 'AggregateRating',

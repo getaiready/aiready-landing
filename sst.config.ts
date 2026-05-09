@@ -16,7 +16,7 @@ export default $config({
       },
       defaults: {
         function: {
-          runtime: 'nodejs24.x',
+          runtime: 'nodejs22.x',
         },
       },
     };

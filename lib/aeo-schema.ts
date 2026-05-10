@@ -53,8 +53,42 @@ export const generateSoftwareApplicationSchema = () => {
       '@type': 'Offer',
       price: '0',
       priceCurrency: 'USD',
+      priceValidUntil: '2026-12-31',
       availability: 'https://schema.org/InStock',
+      url: 'https://getaiready.dev',
       description: 'Free and open source',
+      hasMerchantReturnPolicy: {
+        '@type': 'MerchantReturnPolicy',
+        applicableCountry: 'US',
+        returnPolicyCategory: 'https://schema.org/MerchantReturnNotPermitted',
+      },
+      shippingDetails: {
+        '@type': 'OfferShippingDetails',
+        shippingRate: {
+          '@type': 'MonetaryAmount',
+          value: '0',
+          currency: 'USD',
+        },
+        shippingDestination: {
+          '@type': 'DefinedRegion',
+          addressCountry: 'US',
+        },
+        deliveryTime: {
+          '@type': 'ShippingDeliveryTime',
+          handlingTime: {
+            '@type': 'QuantitativeValue',
+            minValue: 0,
+            maxValue: 0,
+            unitCode: 'DAY',
+          },
+          transitTime: {
+            '@type': 'QuantitativeValue',
+            minValue: 0,
+            maxValue: 0,
+            unitCode: 'DAY',
+          },
+        },
+      },
     },
     softwareVersion: '0.7.x',
     downloadUrl: 'https://www.npmjs.com/package/@aiready/cli',

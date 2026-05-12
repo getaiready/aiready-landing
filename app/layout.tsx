@@ -113,9 +113,6 @@ export const metadata: Metadata = {
   },
   category: 'technology',
   classification: 'Developer Tools',
-  verification: {
-    google: 'google-site-verification-token', // TODO: Replace with actual token
-  },
   other: {
     // AI Search Engine specific meta tags for AEO
     'chatgpt:description': aiMetaTags.chatgpt['chatgpt:description'],

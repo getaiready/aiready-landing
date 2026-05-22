@@ -74,8 +74,10 @@ export async function handler(event: Event) {
             Math.max(1, ctx.length),
           maxImportDepth: Math.max(...ctx.map((r) => r.importDepth || 0)),
           avgFragmentation:
-            ctx.reduce((sum: number, r) => sum + (r.fragmentationScore || 0), 0) /
-            Math.max(1, ctx.length),
+            ctx.reduce(
+              (sum: number, r) => sum + (r.fragmentationScore || 0),
+              0
+            ) / Math.max(1, ctx.length),
           criticalIssues: ctx.filter((r) => r.severity === 'critical').length,
           majorIssues: ctx.filter((r) => r.severity === 'major').length,
         };

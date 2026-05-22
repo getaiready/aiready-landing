@@ -2,7 +2,9 @@ import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses';
 
 const ses = new SESClient({});
 
-export async function handler(event: any) {
+export async function handler(event: {
+  Records: Array<{ Sns: { Message: string } }>;
+}) {
   console.log('Received health alert event:', JSON.stringify(event, null, 2));
 
   for (const record of event.Records) {

@@ -6,7 +6,7 @@ vi.mock('@aws-sdk/client-ses', () => ({
   SESClient: function () {
     return { send: mockSend };
   },
-  SendEmailCommand: function (args: any) {
+  SendEmailCommand: function (args: unknown) {
     return args;
   },
 }));

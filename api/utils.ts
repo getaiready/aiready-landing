@@ -14,7 +14,7 @@ export function allowedCorsHeaders() {
 
 export function json(
   statusCode: number,
-  body: any,
+  body: unknown,
   extraHeaders: Record<string, string> = {}
 ) {
   return {

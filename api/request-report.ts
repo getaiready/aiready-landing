@@ -155,8 +155,9 @@ https://getaiready.dev`;
     }
 
     return json(200, { ok: true });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('request-report error', err);
-    return json(500, { error: err?.message || 'Internal error' });
+    const message = err instanceof Error ? err.message : 'Internal error';
+    return json(500, { error: message });
   }
 }

@@ -39,7 +39,7 @@ export default $config({
 
     // For production, don't try to create SES identity - it already exists
     // For dev, optionally create if requested
-    const manageSesDomainIdentity =
+    const _manageSesDomainIdentity =
       isProduction && process.env.SES_MANAGE_DOMAIN_IDENTITY === 'true';
 
     const emailDomain = domainName;

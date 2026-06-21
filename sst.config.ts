@@ -28,7 +28,7 @@ export default $config({
     const isDev = $app.stage === 'dev';
     const isPersonal = $app.stage === 'personal';
     const domainName = isProduction
-      ? 'getaiready.dev' 
+      ? 'getaiready.dev'
       : isPersonal
         ? 'backup.getaiready.dev'
         : 'dev.getaiready.dev';

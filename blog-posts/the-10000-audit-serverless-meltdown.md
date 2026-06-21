@@ -13,26 +13,29 @@ For an independent open-source project, this was an existential threat. But it w
 The culprit wasn't a sophisticated hack or a heavy LLM reasoning task. It was a simple, humble logic error in an event-driven loop.
 
 ### 1. The Infinite Recursive Loop
-Our system uses EventBridge to orchestrate audits. A completion event (`AUDIT_COMPLETED`) was supposed to signal the end of a run. However, the handler was misconfigured to treat *any* completion event as a new trigger. 
+
+Our system uses EventBridge to orchestrate audits. A completion event (`AUDIT_COMPLETED`) was supposed to signal the end of a run. However, the handler was misconfigured to treat _any_ completion event as a new trigger.
 
 `Trigger -> Audit -> Complete -> Trigger`
 
 This loop began running at account-wide concurrency limits, processing **326 million events** in 72 hours.
 
 ### 2. The "Dead Man's Switch" Trap
+
 To make matters worse, our automated recovery logic (the Dead Man's Switch) interpreted the loop-induced latency as a system failure. It responded by repeatedly triggering fresh deployments and audits, pouring gasoline on the recursive fire.
 
 ### 3. The Ingestion Tax
+
 Compute (Lambda) and Database (DynamoDB) costs were high, but the real winner was **CloudWatch Logs**. Because we had verbose telemetry enabled, the sheer volume of data ingested during the loop cost us **$5,088.38** alone.
 
 ## How We Fixed It (The "Safety Stack")
 
 We didn't just patch the bug; we rebuilt the architecture with a multi-layered safety stack. This experience directly informed how we approach **Agentic Readiness** at AIReady.
 
-*   **Logic Guard:** We implemented strict idempotency and explicit suppression of recursive signals.
-*   **Trace Recursion Limits:** Every autonomous process now tracks its own depth. If an agent tries to "reason" or "delegate" more than 7 layers deep, the system performs a hard, fail-closed shutdown.
-*   **Financial Circuit Breakers:** We moved to **$1/day daily budget alerts**. If a spike occurs, we know within minutes, not days.
-*   **Aggressive Throttling:** We reduced our recovery schedules from every 15 minutes to every 2 hours.
+- **Logic Guard:** We implemented strict idempotency and explicit suppression of recursive signals.
+- **Trace Recursion Limits:** Every autonomous process now tracks its own depth. If an agent tries to "reason" or "delegate" more than 7 layers deep, the system performs a hard, fail-closed shutdown.
+- **Financial Circuit Breakers:** We moved to **$1/day daily budget alerts**. If a spike occurs, we know within minutes, not days.
+- **Aggressive Throttling:** We reduced our recovery schedules from every 15 minutes to every 2 hours.
 
 ## Lessons for the AI-First Engineering
 
@@ -48,4 +51,4 @@ Building autonomous AI on serverless is the future, but only if we build with th
 
 ---
 
-*ServerlessClaw is an MIT-licensed framework for autonomous agent swarms. Check it out on [GitHub](https://github.com/serverlessclaw/serverlessclaw), and use [AIReady](https://getaiready.dev) to audit your own codebase for agentic safety.*
+_ServerlessClaw is an MIT-licensed framework for autonomous agent swarms. Check it out on [GitHub](https://github.com/serverlessclaw/serverlessclaw), and use [AIReady](https://getaiready.dev) to audit your own codebase for agentic safety._

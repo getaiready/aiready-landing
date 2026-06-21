@@ -37,7 +37,9 @@ const Post = () => (
       task. It was a simple, humble logic error in an event-driven loop.
     </p>
 
-    <h3 className="text-xl font-bold mt-6 mb-3">1. The Infinite Recursive Loop</h3>
+    <h3 className="text-xl font-bold mt-6 mb-3">
+      1. The Infinite Recursive Loop
+    </h3>
     <p className="mb-4">
       Our system uses EventBridge to orchestrate audits. A completion event (
       <code>AUDIT_COMPLETED</code>) was supposed to signal the end of a run.
@@ -110,7 +112,9 @@ const Post = () => (
 
     <ol className="list-decimal pl-6 mb-6 space-y-2">
       <li>
-        <strong>Serverless Scales to Infinity (and your bank account follows):</strong>{' '}
+        <strong>
+          Serverless Scales to Infinity (and your bank account follows):
+        </strong>{' '}
         Always set hard concurrency and budget limits at the infrastructure
         layer.
       </li>

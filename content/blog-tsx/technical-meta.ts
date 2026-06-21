@@ -28,8 +28,10 @@ import whyAiCodingAssistantsGetWorseMeta from './why-ai-coding-assistants-get-wo
 import multiHumanMultiAgentCollaborationMeta from './multi-human-multi-agent-collaboration.meta';
 import deepseekV4ExpertModeMeta from './deepseek-v4-expert-mode.meta';
 import tokenOptimizationGuideMeta from './token-optimization-guide.meta';
+import serverlessMeltdownMeta from './serverless-meltdown.meta';
 
 export const technicalMeta = [
+  serverlessMeltdownMeta,
   tokenOptimizationGuideMeta,
   deepseekV4ExpertModeMeta,
   theNeuralSpineMeta,

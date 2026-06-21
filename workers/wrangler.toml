@@ -1,0 +1,12 @@
+name = "root-redirect"
+main = "redirect.js"
+compatibility_date = "2024-04-01"
+workers_dev = false
+
+[[routes]]
+pattern = "getaiready.dev/*"
+zone_id = "50eb7dcadc84c58ab34583742db0b671"
+
+[[routes]]
+pattern = "www.getaiready.dev/*"
+zone_id = "50eb7dcadc84c58ab34583742db0b671"

@@ -63,4 +63,5 @@ export const contentLoaders: Record<string, () => Promise<{ default: any }>> = {
     import('./claweague-series-part-4-eclawnomy-manifesto'),
   'vibe-coding-cost-cutting': () => import('./vibe-coding-cost-cutting'),
   'token-optimization-guide': () => import('./token-optimization-guide'),
+  'serverless-meltdown-10k-audit': () => import('./serverless-meltdown'),
 };

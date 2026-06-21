@@ -26,7 +26,12 @@ export default $config({
 
     const isProduction = $app.stage === 'production';
     const isDev = $app.stage === 'dev';
-    const domainName = isProduction ? 'getaiready.dev' : 'dev.getaiready.dev';
+    const isPersonal = $app.stage === 'personal';
+    const domainName = isProduction
+      ? 'getaiready.dev' 
+      : isPersonal
+        ? 'backup.getaiready.dev'
+        : 'dev.getaiready.dev';
 
     // Storage for report submissions
     const submissions = new sst.aws.Bucket('SubmissionsV3', {
@@ -67,8 +72,26 @@ export default $config({
       ],
     });
 
-    // Static site deployment - use custom domain for production and dev
-    const useCustomDomain = isProduction || isDev;
+    // Static site deployment - use custom domain for production, dev and personal
+    const useCustomDomain = isProduction || isDev || isPersonal;
+
+    if (isPersonal) {
+      const redirectFunc = new sst.aws.Function('RedirectLambda', {
+        handler: 'functions/redirect.handler',
+        url: true,
+      });
+
+      /*
+      // Point root domain to Lambda URL
+      new sst.cloudflare.dns.Record('RootDnsRecord', {
+        zone: cloudflareZoneId,
+        name: 'getaiready.dev',
+        type: 'CNAME',
+        value: redirectFunc.url.apply(url => new URL(url).hostname),
+        proxied: true,
+      });
+      */
+    }
 
     const site = new sst.aws.StaticSite('AireadyLanding', {
       path: './',
